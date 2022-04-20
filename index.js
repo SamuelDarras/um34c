@@ -1,18 +1,21 @@
 import BluetoothClassicSerialportClient from "bluetooth-classic-serialport-client"
 import { Buffer } from "buffer"
+import { EventEmitter } from "events"
 
 const serial = new BluetoothClassicSerialportClient()
 
-class UM34C {
+class UM34C extends EventEmitter {
     constructor(serial) {
+        super()
         this.serial = serial
         this._readSoFar = Buffer.alloc(130)
         this._dataLength = 0
+        this.data = {}
         this.serial.on('data', (data) => {
             data.copy(this._readSoFar, this._dataLength)
             this._dataLength += data.length
             if (this._dataLength >= 130)
-                console.log(this.convert(this._readSoFar))
+                this.data = this.convert(this._readSoFar)
         })
     }
 
@@ -21,7 +24,6 @@ class UM34C {
         
         var hex = buffer.toString("hex") 
 
-        // console.log(hex)
         const modes = {
             0: "Unknown",
             1: "QC2.0",
@@ -107,8 +109,9 @@ class UM34C {
     }
 
     readEvery(millis) {
-        this._timer = setInterval(() => {
-            this.readData()
+        this._timer = setInterval(async () => {
+            await this.readData()
+            this.emit("read", this.data)
         }, millis)
     }
 }
@@ -125,11 +128,17 @@ while (nb_scans < MAX_SCANS) {
     for (let device of devices) {
         console.log(device)
         if (device .name === "UM34C") {
+
             serial.connect(device.address)
                 .then(async () => {
                     console.log("Connected")
                     
                     let device = new UM34C(serial)
+                    
+                    device.on("read", (data) => {
+                        console.log(data)
+                    })
+
                     device.readEvery(1000)
                 })
                 .catch(err => console.log("Error:", err))
