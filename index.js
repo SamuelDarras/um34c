@@ -34,8 +34,13 @@ class UM34C {
             8: "SAMSUNG"
         }
 
+        var now = new Date().getTime()
+
         var data = {
-            timestamp  : new Date().getTime(),
+            timestamp  : { 
+                millis: now,
+                secs  : now/1000
+            },
             // Voltage in "V"
             voltage    : parseInt("0x" + hex[4]  + hex[5]  + hex[6]  + hex[7])  / 100,
             // Current in "A"
@@ -101,8 +106,10 @@ class UM34C {
         await this.serial.write(Buffer.from("f0", "hex"))
     }
 
-    async exit() {
-        await this.serial.close()
+    readEvery(millis) {
+        this._timer = setInterval(() => {
+            this.readData()
+        }, millis)
     }
 }
 
@@ -123,22 +130,12 @@ while (nb_scans < MAX_SCANS) {
                     console.log("Connected")
                     
                     let device = new UM34C(serial)
-                    setInterval(() => {
-                        device.readData()
-                    }, 500)
+                    device.readEvery(1000)
                 })
                 .catch(err => console.log("Error:", err))
 
             nb_scans = MAX_SCANS
+            break
         }
     }
 }
-
-
-// await device.exit()
-
-// serial.on('data', (data) => {
-//     console.log(data)
-// })
-
-// console.log("closed")
