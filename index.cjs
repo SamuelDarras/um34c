@@ -32,11 +32,13 @@ async function main() {
                     })
                     .catch(err => console.log("Error:", err))
 
-                nb_scans = MAX_SCANS
                 break
             }
         }
+        if (serial.isOpen) break
     }
+
+    if (nb_scans >= MAX_SCANS) console.error("Unable to find UM34C")
 }
 
 main()
