@@ -4,11 +4,15 @@ const { EventEmitter } = require("events")
 class UM34C extends EventEmitter {
     constructor(serial) {
         super()
+        this.timeFromStart = 0
         this.serial = serial
         this._readSoFar = Buffer.alloc(130)
         this._dataLength = 0
         this._timer = null
+        
         this.data = {}
+        this.startTime = new Date().getTime()
+
         this.serial.on('data', (data) => {
             data.copy(this._readSoFar, this._dataLength)
             this._dataLength += data.length
@@ -39,7 +43,7 @@ class UM34C extends EventEmitter {
         var data = {
             timestamp  : { 
                 millis: now,
-                secs  : now/1000
+                fromStart: now-this.startTime,
             },
             // Voltage in "V"
             voltage    : parseInt("0x" + hex[4]  + hex[5]  + hex[6]  + hex[7])  / 100,
@@ -141,6 +145,11 @@ class UM34C extends EventEmitter {
             await this.readData()
             this.emit("read", this.data)
         }, millis)
+    }
+
+    async terminate() {
+        if (this._timer !== null) clearInterval(this._timer)
+        await this.serial.close()
     }
 }
 

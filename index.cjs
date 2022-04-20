@@ -1,5 +1,6 @@
 const BluetoothClassicSerialportClient = require("bluetooth-classic-serialport-client")
 const { Buffer } = require("buffer")
+const { DEFAULT_ECDH_CURVE } = require("tls")
 const { UM34C } = require("./um34c.cjs")
 
 async function main() {
@@ -7,7 +8,8 @@ async function main() {
 
     const MAX_SCANS = 10
     let nb_scans = 0
-    while (nb_scans < MAX_SCANS) {
+    let opened = false
+    while (nb_scans < MAX_SCANS && !opened) {
         nb_scans++
 
         console.log("Scanning...")
@@ -32,10 +34,10 @@ async function main() {
                     })
                     .catch(err => console.log("Error:", err))
 
+                opened = true
                 break
             }
         }
-        if (serial.isOpen) break
     }
 
     if (nb_scans >= MAX_SCANS) console.error("Unable to find UM34C")
