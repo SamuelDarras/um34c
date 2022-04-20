@@ -10,6 +10,7 @@ class UM34C extends EventEmitter {
         this.serial = serial
         this._readSoFar = Buffer.alloc(130)
         this._dataLength = 0
+        this._timer = null
         this.data = {}
         this.serial.on('data', (data) => {
             data.copy(this._readSoFar, this._dataLength)
@@ -95,6 +96,16 @@ class UM34C extends EventEmitter {
             unknown0   : parseInt("0x" + hex[256] + hex[257] + hex[258] + hex[259])
         }
 
+        // Fill groups with data
+        for(var g=0; g<10; g++) {
+            data.groups[g] = {
+                // Current in "mAh"
+                current: parseInt("0x" + hex[32+16*g] + hex[33+16*g] + hex[34+16*g] + hex[35+16*g] + hex[36+16*g] + hex[37+16*g] + hex[38+16*g] + hex[39+16*g]),
+                // Power in "mWh"
+                power  : parseInt("0x" + hex[40+16*g] + hex[41+16*g] + hex[42+16*g] + hex[43+16*g] + hex[44+16*g] + hex[45+16*g] + hex[46+16*g] + hex[47+16*g])
+            }
+        }
+
         return data
     }
 
@@ -104,11 +115,31 @@ class UM34C extends EventEmitter {
     async prev() {
         await this.serial.write(Buffer.from("f3", "hex"))
     }
+    async setGroup(group) {
+        if (group > 9) group = 9
+        if (group < 0) group = 0
+        
+        await this.serial.write(Buffer.from("a"+group, "hex"))
+    }
+    async setBrightness(brightness) {
+        if (brightness > 5) brightness = 5
+        if (brightness < 0) brightness = 0
+        
+        await this.serial.write(Buffer.from("d"+brightness, "hex"))
+    }
+    async setTimeout(time) {
+        if (time > 5) time = 5
+        if (time < 0) time = 0
+        
+        await this.serial.write(Buffer.from("e"+time, "hex"))
+    }
+
     async readData() {
         await this.serial.write(Buffer.from("f0", "hex"))
     }
 
     readEvery(millis) {
+        if (this._timer !== null) clearInterval(this._timer)
         this._timer = setInterval(async () => {
             await this.readData()
             this.emit("read", this.data)
