@@ -149,7 +149,7 @@ class UM34C extends EventEmitter {
 
     async terminate() {
         if (this._timer !== null) clearInterval(this._timer)
-        await this.serial.close()
+        return this.serial.close()
     }
 }
 

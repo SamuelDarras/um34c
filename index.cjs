@@ -1,6 +1,4 @@
 const BluetoothClassicSerialportClient = require("bluetooth-classic-serialport-client")
-const { Buffer } = require("buffer")
-const { DEFAULT_ECDH_CURVE } = require("tls")
 const { UM34C } = require("./um34c.cjs")
 
 async function main() {
@@ -31,6 +29,10 @@ async function main() {
                         })
 
                         device.readEvery(1000)
+
+                        setTimeout(async () => {
+                            await device.terminate()
+                        }, 5000)
                     })
                     .catch(err => console.log("Error:", err))
 
