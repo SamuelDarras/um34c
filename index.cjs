@@ -1,54 +1,41 @@
 const BluetoothClassicSerialportClient = require("bluetooth-classic-serialport-client")
 const { UM34C } = require("./um34c.cjs")
 
-function attemptConnect(serial, device) {
-    if (device .name === "UM34C") {
-
-        serial.connect(device.address)
+function attemptConnect(serial, dev) {
+    return new Promise((resolve, reject) => {
+        serial.connect(dev.address)
             .then(() => {
                 console.log("Connected")
-                
-                let device = new UM34C(serial)
-                
-                device.on("read", (data) => {
-                    console.log(data)
-                })
-
-                device.readEvery(1000)
-
-                setTimeout(() => {
-                    device.terminate()
-                    console.log("Terminated")
-                }, 5000)
+                resolve(new UM34C(serial))
             })
-            .catch(err => console.log("Error:", err))
-
-        return true
-    }
-
-    return false
+            .catch(err => {
+                console.log("Error:", err)
+                reject(err)
+            })
+    })
 }
 
-async function main() {
-    const serial = new BluetoothClassicSerialportClient()
+const serial = new BluetoothClassicSerialportClient()
 
-    const MAX_SCANS = 10
-    let nb_scans = 0
-    let connected = false
-    while (nb_scans < MAX_SCANS && !connected) {
-        nb_scans++
-
-        console.log("Scanning...")
-        let devices = await serial.scan()
-
-        for (let device of devices) {
+console.log("Scanning...")
+serial.scan()
+    .then(devices => {
+        devices.forEach(device => {
             console.log(device)
-            connected = attemptConnect(serial, device)
-            if (connected) break
-        }
-    }
+            if (device.name === "UM34C") {
+                attemptConnect(serial, device)
+                    .then((d) => {
+                        d.on("read", console.log)
 
-    if (nb_scans >= MAX_SCANS) console.error("Unable to find UM34C")
-}
+                        d.readEvery(1000)
 
-main()
+                        setTimeout(() => {
+                            d.terminate().then(() => {
+                                console.log("Terminated")
+                            })
+                        }, 5000)
+                    })
+            }
+        })
+    })
+    .catch(console.error)
