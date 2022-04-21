@@ -2,7 +2,7 @@ const { EventEmitter } = require("events")
 const BluetoothClassicSerialportClient = require("bluetooth-classic-serialport-client")
 const { UM34C } = require("./um34c.cjs")
 
-const site = require("./site/site.cjs")
+const site = require("./site/server.cjs")
 
 function attemptConnect(serial, address) {
     return new Promise((resolve, reject) => {
