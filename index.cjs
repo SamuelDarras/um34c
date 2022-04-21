@@ -28,24 +28,34 @@ function attemptConnect(serial, address) {
 async function main() {
     const serial = new BluetoothClassicSerialportClient()
 
-    console.log("Scanning...")
-    let devices = await serial.scan()
-    console.log(devices)
-    site.wss.on('connection', function connection(ws) {
-        ws.send(JSON.stringify({
-            type: "list",
-            data: devices
-        }))
+    site.wss.on('connection', ws => {
+        ws.on('message', msg => {
+            message = JSON.parse(msg)
+            switch (message.type) {
+                case "list":
+                    ws.send(JSON.stringify({
+                        type: "list",
+                        data: devices
+                    }))
+                    break;
+            
+                default:
+                    break;
+            }
 
-        ws.on('message', function incoming(message) {
-            msg = JSON.parse(message)
-            console.log(`received: ${msg.type}`)
+            console.log(`received: ${message.type}`)
         })
 
         ws.on('error',function(e){ return console.log(e)})
         ws.on('close',function(e){ return console.log('websocket closed', e)})
     })
 
+    console.log("Scanning...")
+    let devices = await serial.scan()
+
+    site.wss.clients.forEach(client => {
+        client.send(JSON.stringify({type: "ready"}))
+    })
 
     rl.on('line', line => {
         n = parseInt(line)
