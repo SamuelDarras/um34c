@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bluetooth-classic-serialport-client": "^0.1.25"
+    "bluetooth-classic-serialport-client": "^0.1.25",
+    "express": "^4.17.3",
+    "ws": "^8.5.0"
   },
   "devDependencies": {
     "wtfnode": "^0.9.1"

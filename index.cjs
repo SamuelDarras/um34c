@@ -1,9 +1,18 @@
 const BluetoothClassicSerialportClient = require("bluetooth-classic-serialport-client")
 const { UM34C } = require("./um34c.cjs")
+const readline = require('readline')
 
-function attemptConnect(serial, dev) {
+const site = require("./site/site.cjs")
+
+var rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
+});
+
+function attemptConnect(serial, address) {
     return new Promise((resolve, reject) => {
-        serial.connect(dev.address)
+        serial.connect(address)
             .then(() => {
                 console.log("Connected")
                 resolve(new UM34C(serial))
@@ -15,27 +24,51 @@ function attemptConnect(serial, dev) {
     })
 }
 
-const serial = new BluetoothClassicSerialportClient()
 
-console.log("Scanning...")
-serial.scan()
-    .then(devices => {
-        devices.forEach(device => {
-            console.log(device)
-            if (device.name === "UM34C") {
-                attemptConnect(serial, device)
-                    .then((d) => {
-                        d.on("read", console.log)
+async function main() {
+    const serial = new BluetoothClassicSerialportClient()
 
-                        d.readEvery(1000)
+    console.log("Scanning...")
+    let devices = await serial.scan()
+    console.log(devices)
+    site.wss.on('connection', function connection(ws) {
+        ws.send(JSON.stringify({
+            type: "list",
+            data: devices
+        }))
 
-                        setTimeout(() => {
-                            d.terminate().then(() => {
-                                console.log("Terminated")
-                            })
-                        }, 5000)
-                    })
-            }
+        ws.on('message', function incoming(message) {
+            msg = JSON.parse(message)
+            console.log(`received: ${msg.type}`)
         })
+
+        ws.on('error',function(e){ return console.log(e)})
+        ws.on('close',function(e){ return console.log('websocket closed', e)})
     })
-    .catch(console.error)
+
+
+    rl.on('line', line => {
+        n = parseInt(line)
+        if (n < 0 || n >= devices.length) {
+            console.log("Not in range")
+            return
+        }
+
+        dev = devices[n]
+        console.log(dev)
+        attemptConnect(serial, dev.address)
+            .then((d) => {
+                d.on("read", console.log)
+
+                d.readEvery(1000)
+
+                // setTimeout(() => {
+                //     d.terminate().then(() => {
+                //         console.log("Terminated")
+                //     })
+                // }, 5000)
+            })
+        })
+}
+
+main()
