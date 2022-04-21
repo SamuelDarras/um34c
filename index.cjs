@@ -16,8 +16,8 @@ function attemptConnect(serial, device) {
 
                 device.readEvery(1000)
 
-                setTimeout(async () => {
-                    await device.terminate()
+                setTimeout(() => {
+                    device.terminate()
                     console.log("Terminated")
                 }, 5000)
             })
