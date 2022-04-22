@@ -147,7 +147,7 @@ class UM34C extends EventEmitter {
         }
         if (this._interval !== null) clearInterval(this._interval)
         this._interval = setInterval(async () => {
-            await this.readData()
+            this.readData()
         }, millis)
     }
 

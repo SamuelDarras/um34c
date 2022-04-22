@@ -41,14 +41,14 @@ class Controller extends EventEmitter {
 
     disconnect() {
         return new Promise((resolve, reject) => {
-            if (this.device !== null)
+            if (!this.serial.isOpen || this.device !== null)
                 this.device.terminate()
                     .then(() => {
                         this.device = null
                         resolve()
                     })
                     .catch(err => {
-                        console.log(err)
+                        reject(err)
                     })
             else reject(new Error("No device connected"))
         })
