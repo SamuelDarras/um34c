@@ -1,8 +1,8 @@
 var ws = new WebSocket("ws://localhost:8080")
 
-const devicesList = document.getElementById("devicesList")
-const dataView    = document.getElementById("data")
-const rateInput   = document.getElementById("rateInput")
+const devicesList  = document.getElementById("devicesList")
+const receivedView = document.getElementById("received")
+const rateInput    = document.getElementById("rateInput")
 
 class Controller extends EventTarget {
     constructor(ws) {
@@ -11,6 +11,7 @@ class Controller extends EventTarget {
         this.ws = ws
         this.ws.onmessage = msg => {
             let message = JSON.parse(msg.data)
+            receivedView.innerHTML = JSON.stringify(message, null, 4)
             console.log(message)
             this.dispatchEvent(new CustomEvent(message.type, {detail: message.data}))
         }
@@ -61,6 +62,5 @@ controller.addEventListener("ready", evt => {
 })
 
 controller.addEventListener("data", evt => {
-    data = evt.detail
-    dataView.innerHTML = JSON.stringify(data, null, 4)
+    // TODO
 })
