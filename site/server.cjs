@@ -5,10 +5,10 @@ const path = require("path")
 
 const app = express();
 
-app.use('/static', express.static(__dirname + '/public'))
+app.use('/static', express.static(__dirname + '/html/public'))
 
 app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'))
+  res.sendFile(path.join(__dirname, '/html/index.html'))
 })
 
 const server = http.createServer(app);

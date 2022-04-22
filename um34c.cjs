@@ -111,33 +111,33 @@ class UM34C extends EventEmitter {
         this.emit("read", this.data)
     }
 
-    async next() {
-        await this.serial.write(Buffer.from("f1", "hex"))
+    next() {
+        this.serial.write(Buffer.from("f1", "hex"))
     }
-    async prev() {
-        await this.serial.write(Buffer.from("f3", "hex"))
+    prev() {
+        this.serial.write(Buffer.from("f3", "hex"))
     }
-    async setGroup(group) {
+    setGroup(group) {
         if (group > 9) group = 9
         if (group < 0) group = 0
         
-        await this.serial.write(Buffer.from("a"+group, "hex"))
+        this.serial.write(Buffer.from("a"+group, "hex"))
     }
-    async setBrightness(brightness) {
+    setBrightness(brightness) {
         if (brightness > 5) brightness = 5
         if (brightness < 0) brightness = 0
         
-        await this.serial.write(Buffer.from("d"+brightness, "hex"))
+        this.serial.write(Buffer.from("d"+brightness, "hex"))
     }
-    async setTimeout(time) {
+    setTimeout(time) {
         if (time > 5) time = 5
         if (time < 0) time = 0
         
-        await this.serial.write(Buffer.from("e"+time, "hex"))
+        this.serial.write(Buffer.from("e"+time, "hex"))
     }
 
-    async readData() {
-        await this.serial.write(Buffer.from("f0", "hex"))
+    readData() {
+        this.serial.write(Buffer.from("f0", "hex"))
     }
 
     readEvery(millis) {
@@ -147,7 +147,7 @@ class UM34C extends EventEmitter {
         }, millis)
     }
 
-    async terminate() {
+    terminate() {
         if (this._interval !== null) clearInterval(this._interval)
         return this.serial.close()
     }

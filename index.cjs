@@ -4,19 +4,6 @@ const { UM34C } = require("./um34c.cjs")
 
 const site = require("./site/server.cjs")
 
-function attemptConnect(serial, address) {
-    return new Promise((resolve, reject) => {
-        serial.connect(address)
-            .then(() => {
-                console.log("Connected")
-                resolve(new UM34C(serial))
-            })
-            .catch(err => {
-                console.log("Error:", err)
-                reject(err)
-            })
-    })
-}
 
 class Controller extends EventEmitter {
     constructor(ws) {
@@ -28,71 +15,114 @@ class Controller extends EventEmitter {
             console.log(message)
             this.emit(message.type, message.data)
         })
+
+        this.serial = new BluetoothClassicSerialportClient()
+
+        this.device = null
     }
 
-    succes() {
-        this.ws.send(JSON.stringify({type: "succes", data: null}))
+    scan() {
+        return this.serial.scan()
     }
-    error(err) {
-        this.ws.send(JSON.stringify({type: "error", err: err.message}))
+
+    connect(address) {
+        return new Promise((resolve, reject) => {
+            this.serial.connect(address)
+                .then(() => {
+                    this.device = new UM34C(this.serial)
+                    resolve(this.device)
+                })
+                .catch(err => {
+                    reject(err)
+                })
+        })
+    }
+
+    disconnect() {
+        return new Promise((resolve, reject) => {
+            if (this.device !== null)
+                this.device.terminate()
+                    .then(() => {
+                        this.device = null
+                        resolve()
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+            else reject(new Error("No device connected"))
+        })
+    }
+
+    send(type, data) {
+        this.ws.send(JSON.stringify({type: type, data: data}))
+    }
+
+    succes(what) {
+        this.ws.send(JSON.stringify({type: "succes", data: {what: what}}))
+    }
+    error(err, what) {
+        this.ws.send(JSON.stringify({type: "error", data: {what: what, msg: err.message}}))
     }
 }
 
 async function main() {
-    const serial = new BluetoothClassicSerialportClient()
     let isReady = false
 
-    let devices = []
-    let connectedDevice = null
-
     site.wss.on('connection', ws => {
-        if (isReady) {
-            ws.send(JSON.stringify({type: "ready"}))
-        }
-
         let controller = new Controller(ws)
 
-        controller.on("list", data => {
-            ws.send(JSON.stringify({
-                type: "list",
-                data: devices
-            }))
+        if (isReady) {
+            controller.send("ready", null)
+        }
+
+        controller.on("list", devices => {
+            controller.send("list", devices)
         })
 
         controller.on("scan", data => {
             console.log("Scanning...")
-            serial.scan().then(devs => {
-                devices = devs
-                controller.emit("list", {})
-                console.log(devices)
-            }).catch(() => {})
+            controller.scan()
+                .then(devices => {
+                    controller.emit("list", devices)
+                    console.log(devices)
+                })
+                .catch(err => {
+                    console.error(err)
+                    controller.error(err, "scan")
+                })
         })
 
         controller.on("connect", data => {
-                    attemptConnect(serial, data.addr)
-                        .then((d) => {
-                            controller.succes()
-
-                            connectedDevice = d
-                            d.on("read", (data) => {
-                                console.log(data)
-                                ws.send(JSON.stringify({type: "data", data}))
-                            })
-                            d.readEvery(1000)
-                        })
-                        .catch(console.error)
-                    
+            controller.connect(data.addr)
+                .then(device => {
+                    controller.succes("connect")
+                    device.on("read", (data) => {
+                        console.log(data)
+                        controller.send("data", data)
+                    })
+                    device.readEvery(1000)
+                })
+                .catch(err => {
+                    console.error(err)
+                    controller.error(err, "connect")
+                })              
         })
 
         controller.on("disconnect", data => {
-            connectedDevice.terminate().then(() => {
-                controller.succes()
-            })
+            controller.disconnect()
+                .then(() => {
+                    controller.succes("disconnect")
+                })
+                .catch(err => controller.error(err, "disconnect"))
         })
 
         controller.on("changeRate", data => {
-            connectedDevice.readEvery(data.rate)
-            controller.succes()
+            if (controller.device !== null) {
+                controller.device.readEvery(data.rate)
+                controller.succes("changeRate")
+            } else {
+                controller.error(new Error("No connected device"), "changeRate")
+            }
         })
 
         ws.on('error',function(e){ return console.log(e)})
@@ -104,5 +134,7 @@ async function main() {
         client.send(JSON.stringify({type: "ready"}))
     })
 }
+
+//TODO reconnect after disconnect
 
 main()

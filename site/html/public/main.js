@@ -57,12 +57,10 @@ controller.addEventListener("list", evt => {
 })
 
 controller.addEventListener("ready", evt => {
-    ws.send(JSON.stringify({type:"list"}))
+    ws.send(JSON.stringify({type:"scan"}))
 })
 
 controller.addEventListener("data", evt => {
     data = evt.detail
     dataView.innerHTML = JSON.stringify(data, null, 4)
 })
-
-scan()
