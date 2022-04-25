@@ -2,11 +2,14 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
+import { createPinia } from 'pinia'
+
 
 loadFonts()
 
-const app = createApp(App)
 
+const app = createApp(App)
+app.use(createPinia())
 
 class Controller extends EventTarget {
     constructor(ws) {

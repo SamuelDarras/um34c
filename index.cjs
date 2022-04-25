@@ -1,5 +1,5 @@
 const { Controller } = require("./controller.cjs")
-const site = require("./site/server.cjs")
+const site = require("./server.cjs")
 
 const wtf = require("wtfnode")
 
@@ -32,39 +32,44 @@ async function main() {
                 })
         })
 
-        controller.on("connect", data => {
-            controller.info("connecting")
-            controller.connect(data.addr)
-                .then(device => {
-                    controller.success("connect", {addr: data.addr})
-                    device.on("read", data => {
-                        controller.send("data", data)
+        controller
+            .on("connect", data => {
+                controller.info("connecting")
+                controller.connect(data.addr)
+                    .then(device => {
+                        controller.success("connect", {addr: data.addr})
+                        device.on("read", data => {
+                            controller.send("data", data)
+                        })
+                        device.readEvery(1000)
                     })
-                    device.readEvery(1000)
-                })
-                .catch(err => {
-                    console.error(err)
-                    controller.error(err, "connect")
-                })              
-        })
-
-        controller.on("disconnect", data => {
-            controller.disconnect()
-                .then(() => {
-                    controller.success("disconnect")
-                    // process.exit(1)
-                })
-                .catch(err => controller.error(err, "disconnect"))
-        })
-
-        controller.on("changeRate", data => {
-            if (controller.device !== null) {
-                controller.device.readEvery(data.rate)
-                controller.success("changeRate")
-            } else {
-                controller.error(new Error("No connected device"), "changeRate")
-            }
-        })
+                    .catch(err => {
+                        console.error(err)
+                        controller.error(err, "connect")
+                    })              
+            })
+            .on("disconnect", data => {
+                controller.disconnect()
+                    .then(() => {
+                        controller.success("disconnect")
+                        // process.exit(1)
+                    })
+                    .catch(err => controller.error(err, "disconnect"))
+            })
+            .on("changeRate", data => {
+                if (controller.device !== null) {
+                    controller.device.readEvery(data.rate)
+                    controller.success("changeRate")
+                } else {
+                    controller.error(new Error("No connected device"), "changeRate")
+                }
+            })
+            .on("prevScreen", data => {
+                controller.device.prev()
+            })
+            .on("nextScreen", data => {
+                controller.device.next()
+            })
 
         ws.on('error',function(e){ return console.log(e)})
         ws.on('close',function(e){ return console.log('websocket closed', e)})

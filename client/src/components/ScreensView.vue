@@ -1,0 +1,61 @@
+<template>
+    <v-card class="ma-6">
+        <v-card-title>Ecran {{ data.screen }}</v-card-title>
+    
+        <v-card-text>
+            <v-container v-if="data.screen == 0">
+                <v-row>
+                    <v-col>{{ data.voltage }} V</v-col>
+                    <v-col>{{ data.temperature.celsius }}°C</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.current }} A</v-col>
+                    <v-col>Groupe: {{ data.group }}</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.groups[data.group].current }} mAh</v-col>
+                    <v-col>{{ data.resistence }} Ω</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.groups[data.group].power }} mWh</v-col>
+                    <v-col>{{ data.power }} W</v-col>
+                </v-row>
+            </v-container>
+        
+            <v-container v-else-if="data.screen == 1">
+                <v-row>
+                    <v-col>{{ data.voltage }} V</v-col>
+                    <v-col>{{ data.temperature.celsius }}°C</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.current }} A</v-col>
+                    <v-col>Groupe: {{ data.group }}</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.dataline.plus }} V</v-col>
+                    <v-col>Mode</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.dataline.minus }} V</v-col>
+                    <v-col>{{ data.mode.name }}</v-col>
+                </v-row>
+            </v-container>
+        </v-card-text>
+        <v-card-actions>
+            <v-btn color="primary" class="ma-6" @click="wsm.controller.send('prevScreen')">Précédent</v-btn>
+            <v-btn color="primary" class="ma-6" @click="wsm.controller.send('nextScreen')">Suivant</v-btn>
+        </v-card-actions>
+    </v-card>
+</template>
+
+<script>
+
+export default {
+    name: "ScreensView",
+    props: ["data"]
+}
+</script>
+
+<style scoped>
+
+</style>

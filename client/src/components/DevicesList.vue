@@ -1,7 +1,7 @@
 <template>
   <v-card class="ma-6">
     <v-card-title>
-        Appareils
+        Appareils {{ state.scanning }}
         <v-progress-circular
             v-if="state.scanning"
             style="margin-left: 1rem"
@@ -46,55 +46,62 @@
         </v-table>
     </v-card-text>
     <v-card-actions>
-        <v-btn @click="wsm.scan()">Scanner</v-btn>
+        <v-btn color="primary" @click="wsm.scan()">Scanner</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
+import { useState } from "@/stores/stateStore";
+
 export default {
-  name: "DevicesList",
-  data: function() {
-      return {
-        devices: [],
-        connectedAddr: "",
-        state: {
-            scanning: false,
+    name: "DevicesList",
+    props: ["data"],
+    data() {
+        return {
+            devices: [],
+            connectedAddr: "",
         }
-      }
-  },
-  created: function () {
-    this.wsm.controller
-      .on("ready", () => {
-        this.wsm.scan()
-      })
-      .on("list", (data) => {
-        this.devices = data
-      })
-      .on("info", (data) => {
-        switch (data.what) {
-          case "scanning":
-            this.state.scanning = true
-            break
+    },
+    setup() {
+        const state = useState()
+        return {
+            state
+        }
+    },
+    created() {
+        this.wsm.controller
+            .on("ready", () => {
+                this.wsm.scan()
+            })
+            .on("list", (data) => {
+                this.devices = data
+            })
+            .on("info", (data) => {
+                switch (data.what) {
+                case "scanning":
+                    this.state.scanning = true
+                    break
 
-          default:
-            break
-        }
-      })
-      .on("success", (data) => {
-        switch (data.what) {
-          case "scanning":
-            this.state.scanning = false
-            break
-          case "connect":
-            this.connectedAddr = data.addr
-            break
+                default:
+                    break
+                }
+                console.log(this.state)
+                })
+            .on("success", (data) => {
+                switch (data.what) {
+                case "scanning":
+                    this.state.scanning = false
+                    break
+                case "connect":
+                    this.connectedAddr = data.addr
+                    break
 
-          default:
-            break
-        }
-      })
-  },
+                default:
+                    break
+                }
+            })
+    },
 }
 </script>
 
