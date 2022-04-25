@@ -1,6 +1,7 @@
 const { Controller } = require("./controller.cjs")
 const site = require("./site/server.cjs")
 
+const wtf = require("wtfnode")
 
 async function main() {
     let isReady = false
@@ -21,6 +22,7 @@ async function main() {
             controller.info("scanning")
             controller.scan()
                 .then(devices => {
+                    controller.success("scanning")
                     controller.emit("list", devices)
                     console.log(devices)
                 })
@@ -34,8 +36,8 @@ async function main() {
             controller.info("connecting")
             controller.connect(data.addr)
                 .then(device => {
-                    controller.succes("connect")
-                    device.on("read", (data) => {
+                    controller.success("connect", {addr: data.addr})
+                    device.on("read", data => {
                         controller.send("data", data)
                     })
                     device.readEvery(1000)
@@ -49,7 +51,8 @@ async function main() {
         controller.on("disconnect", data => {
             controller.disconnect()
                 .then(() => {
-                    controller.succes("disconnect")
+                    controller.success("disconnect")
+                    // process.exit(1)
                 })
                 .catch(err => controller.error(err, "disconnect"))
         })
@@ -57,7 +60,7 @@ async function main() {
         controller.on("changeRate", data => {
             if (controller.device !== null) {
                 controller.device.readEvery(data.rate)
-                controller.succes("changeRate")
+                controller.success("changeRate")
             } else {
                 controller.error(new Error("No connected device"), "changeRate")
             }
@@ -72,7 +75,5 @@ async function main() {
         client.send(JSON.stringify({type: "ready"}))
     })
 }
-
-//TODO reconnect after disconnect
 
 main()
