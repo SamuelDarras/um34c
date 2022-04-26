@@ -32,11 +32,11 @@
                     <v-col>Groupe: {{ data.group }}</v-col>
                 </v-row>
                 <v-row>
-                    <v-col>{{ data.dataline.plus }} V</v-col>
+                    <v-col>+ {{ data.dataline.plus }} V</v-col>
                     <v-col>Mode</v-col>
                 </v-row>
                 <v-row>
-                    <v-col>{{ data.dataline.minus }} V</v-col>
+                    <v-col>- {{ data.dataline.minus }} V</v-col>
                     <v-col>{{ data.mode.name }}</v-col>
                 </v-row>
             </v-container>

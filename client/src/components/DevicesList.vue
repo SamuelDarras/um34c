@@ -1,7 +1,7 @@
 <template>
   <v-card class="ma-6">
     <v-card-title>
-        Appareils {{ state.scanning }}
+        Appareils
         <v-progress-circular
             v-if="state.scanning"
             style="margin-left: 1rem"
@@ -37,7 +37,6 @@
                     icon="mdi-bluetooth-connect"
                     size="x-small"
                     color="success"
-                    outlined
                 >
                 </v-btn>
                 </th>

@@ -4,6 +4,7 @@
             <v-tab value="devicesList">Liste</v-tab>
             <v-tab value="screens">Ecrans</v-tab>
             <v-tab value="graph">Graphe</v-tab>
+            <v-tab value="log">Log</v-tab>
         </v-tabs>
 
         <v-window v-model="tab">
@@ -16,12 +17,10 @@
             <v-window-item value="graph">
                 <GraphView :data="receivedData"></GraphView>
             </v-window-item>
+            <v-window-item value="log">
+                <LogView :data="receivedData"></LogView>
+            </v-window-item>
         </v-window>
-
-        <code>
-            {{ receivedData }}
-        </code>
-
     </v-app>
 </template>
 
@@ -29,13 +28,15 @@
 import DevicesList from "./components/DevicesList.vue"
 import ScreensView from "./components/ScreensView.vue"
 import GraphView   from "./components/GraphView.vue"
+import LogView     from "./components/LogView.vue"
 
 export default {
     name: "App",
     components: {
         DevicesList,
         ScreensView,
-        GraphView
+        GraphView,
+        LogView
     },
     data: function () { 
         return {
