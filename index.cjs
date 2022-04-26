@@ -1,8 +1,6 @@
 const { Controller } = require("./controller.cjs")
 const site = require("./server.cjs")
 
-const wtf = require("wtfnode")
-
 async function main() {
     let isReady = false
 

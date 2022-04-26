@@ -13,8 +13,5 @@
     "@vue/cli": "^5.0.4",
     "bluetooth-classic-serialport-client": "^0.1.25",
     "ws": "^8.5.0"
-  },
-  "devDependencies": {
-    "wtfnode": "^0.9.1"
   }
 }
