@@ -21,7 +21,7 @@ async function main() {
             controller.scan()
                 .then(devices => {
                     controller.success("scanning")
-                    controller.emit("list", devices)
+                    controller.emit("list", devices.filter(v => v.name == "UM34C"))
                     console.log(devices)
                 })
                 .catch(err => {

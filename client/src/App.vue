@@ -19,7 +19,7 @@
                 <GraphView :data="receivedData"></GraphView>
             </v-window-item>
             <v-window-item value="log">
-                <LogView :data="receivedData" :receivedHistory="receivedHistory"></LogView>
+                <LogView :data="receivedData" :receivedHistory="receivedHistory" @clear="receivedHistory = []; curNum = 0"></LogView>
             </v-window-item>
             <v-window-item value="settings">
                 <SettingsView :data="receivedData"></SettingsView>
