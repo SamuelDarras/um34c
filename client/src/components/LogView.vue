@@ -19,20 +19,12 @@
 <script>
 export default {
     name: "LogView",
-    props: ["data"],
+    props: ["data", "receivedHistory"],
     data: function() {
         return {
-            receivedHistory: [],
             curNum: 0
         }
     },
-    watch: {
-        data: function(n) {
-            if (this.receivedHistory.length > 4) this.receivedHistory.pop()
-            this.curNum++
-            this.receivedHistory.unshift({id: this.curNum, data: n})
-        }
-    }
 }
 </script>
 
