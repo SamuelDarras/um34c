@@ -40,6 +40,44 @@
                     <v-col>{{ data.mode.name }}</v-col>
                 </v-row>
             </v-container>
+
+            <v-container v-else-if="data.screen == 2">
+                <v-row>
+                    <v-col>{{ data.record.current }} mAh</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.record.power }} mWh</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>Temps: {{ data.record.time }}</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>Seuil: {{ data.record.threshold }} V</v-col>
+                </v-row>
+            </v-container>
+
+            <v-container v-else-if="data.screen == 3">
+                <v-row>
+                    <v-col>{{ data.record.current }} mAh</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>{{ data.record.power }} mWh</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>Temps: {{ data.record.time }}</v-col>
+                </v-row>
+                <v-row>
+                    <v-col>Seuil: {{ data.record.threshold }} V</v-col>
+                </v-row>
+            </v-container>
+
+            <v-container v-else-if="data.screen == 4">
+                <GraphView :data="data"></GraphView>
+            </v-container>
+
+            <v-container v-else-if="data.screen == 5">
+                <SettingsView :data="data"></SettingsView>
+            </v-container>
         </v-card-text>
         <v-card-actions>
             <v-btn color="primary" class="ma-6" @click="wsm.controller.send('prevScreen')">Précédent</v-btn>
@@ -49,10 +87,16 @@
 </template>
 
 <script>
+import GraphView    from "@/components/GraphView.vue"
+import SettingsView from "@/components/SettingsView.vue"
 
 export default {
     name: "ScreensView",
-    props: ["data"]
+    props: ["data"],
+    components: {
+        GraphView,
+        SettingsView
+    }
 }
 </script>
 
