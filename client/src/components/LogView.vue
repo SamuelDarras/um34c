@@ -5,7 +5,7 @@
             <v-btn icon="mdi-trash-can" class="ml-6" size="small" color="error" @click="$emit('clear')"></v-btn>
         </v-card-title>
         <v-card-text>
-            <v-sheet :rounded="true" :elevation="4" class="ma-3 pa-3" v-for="d in receivedHistory" :key="d.id">
+            <v-sheet :rounded="true" :elevation="4" class="ma-3 pa-3" v-for="d in receivedHistory.slice(0, 5)" :key="d.id">
                 <pre>
                     {{d.id}}: {{ JSON.stringify(d.data, null, 4) }}
                 </pre>

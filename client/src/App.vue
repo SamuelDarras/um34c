@@ -13,16 +13,16 @@
                 <DevicesList :data="receivedData"></DevicesList>
             </v-window-item>
             <v-window-item value="screens">
-                <ScreensView :data="receivedData"></ScreensView>
+                <ScreensView :data="receivedData" :receivedHistory="receivedHistory"></ScreensView>
             </v-window-item>
-            <v-window-item value="graph">
-                <GraphView :data="receivedData"></GraphView>
+            <v-window-item value="graph" v-if="curNum">
+                <GraphView :data="receivedData" :receivedHistory="receivedHistory"></GraphView>
             </v-window-item>
             <v-window-item value="log">
                 <LogView :data="receivedData" :receivedHistory="receivedHistory" @clear="receivedHistory = []; curNum = 0"></LogView>
             </v-window-item>
             <v-window-item value="settings">
-                <SettingsView :data="receivedData"></SettingsView>
+                <SettingsView :data="receivedData" :receivedHistory="receivedHistory"></SettingsView>
             </v-window-item>
         </v-window>
     </v-app>
@@ -57,7 +57,7 @@ export default {
             .on("data", data => {
                 this.receivedData = data
                 
-                if (this.receivedHistory.length > 5) this.receivedHistory.pop()
+                if (this.receivedHistory.length > 500) this.receivedHistory.pop()
                 this.curNum++
                 this.receivedHistory.unshift({id: this.curNum, data: data})
             })

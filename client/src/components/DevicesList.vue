@@ -46,6 +46,7 @@
     </v-card-text>
     <v-card-actions>
         <v-btn color="primary" @click="wsm.scan()">Scanner</v-btn>
+        <v-btn color="primary" @click="wsm.disconnect()">Deconnecter</v-btn>
     </v-card-actions>
   </v-card>
 </template>

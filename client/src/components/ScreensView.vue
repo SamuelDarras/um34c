@@ -72,7 +72,7 @@
             </v-container>
 
             <v-container v-else-if="data.screen == 4">
-                <GraphView :data="data"></GraphView>
+                <GraphView :data="data" :receivedHistory="receivedHistory"></GraphView>
             </v-container>
 
             <v-container v-else-if="data.screen == 5">
@@ -92,7 +92,7 @@ import SettingsView from "@/components/SettingsView.vue"
 
 export default {
     name: "ScreensView",
-    props: ["data"],
+    props: ["data", "receivedHistory"],
     components: {
         GraphView,
         SettingsView

@@ -4,7 +4,6 @@ import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
 import { createPinia } from 'pinia'
 
-
 loadFonts()
 
 
@@ -41,7 +40,6 @@ const controller = new Controller(ws)
 app.config.globalProperties.wsm = {
     ws: ws,
     controller: controller,
-
     scan() {
         // ws.send(JSON.stringify({type: "scan"}))
         controller.send("scan")
