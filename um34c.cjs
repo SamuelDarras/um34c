@@ -6,6 +6,7 @@ class UM34C extends EventEmitter {
         super()
         this.timeFromStart = 0
         this.serial = serial
+        this.rate = 1000
         this._readSoFar = Buffer.alloc(130)
         this._dataLength = 0
         this._interval = null
@@ -142,9 +143,10 @@ class UM34C extends EventEmitter {
 
     readEvery(millis) {
         if (millis == 0) {
-            clearImmediate(this._interval)
+            clearInterval(this._interval)
             return
         }
+        this.rate = millis
         if (this._interval !== null) clearInterval(this._interval)
         this._interval = setInterval(async () => {
             this.readData()
@@ -152,6 +154,7 @@ class UM34C extends EventEmitter {
     }
 
     terminate() {
+        this.readEvery(0)
         if (this._interval !== null) clearInterval(this._interval)
         return this.serial.close()
     }

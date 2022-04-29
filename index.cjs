@@ -56,6 +56,7 @@ async function main() {
             })
             .on("changeRate", data => {
                 if (controller.device !== null) {
+                    controller.device.rate = data.rate
                     controller.device.readEvery(data.rate)
                     controller.success("changeRate")
                 } else {
@@ -69,8 +70,12 @@ async function main() {
                 controller.device.next()
             })
             .on("changeSettings", data => {
-                controller.device.setBrightness(data.brightness)
-                controller.device.setTimeout(data.timeout)
+                controller.device.readEvery(0)
+
+                controller.device.setBrightness(data.settings.brightness)
+                controller.device.setTimeout(data.settings.timeout)
+
+                setTimeout(() => controller.device.readEvery(controller.device.rate), 400)
             })
 
         ws.on('error',function(e){ return console.log(e)})
