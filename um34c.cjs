@@ -127,13 +127,13 @@ class UM34C extends EventEmitter {
         if (brightness > 5) brightness = 5
         if (brightness < 0) brightness = 0
         
-        this.serial.write(Buffer.from("d"+brightness, "hex"))
+        this.serial.write(Buffer.from("d"+toString(brightness), "hex"))
     }
     setTimeout(time) {
         if (time > 5) time = 5
         if (time < 0) time = 0
         
-        this.serial.write(Buffer.from("e"+time, "hex"))
+        this.serial.write(Buffer.from("e"+toString(time), "hex"))
     }
 
     readData() {

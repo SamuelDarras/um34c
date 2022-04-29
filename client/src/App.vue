@@ -1,5 +1,5 @@
 <template>
-    <v-app>
+    <v-app @applySettings="console.log('ici')">
         <v-tabs v-model="tab" background-color="primary">
             <v-tab value="devicesList">Liste</v-tab>
             <v-tab value="screens">Ecrans</v-tab>
@@ -12,16 +12,16 @@
             <v-window-item value="devicesList">
                 <DevicesList :data="receivedData"></DevicesList>
             </v-window-item>
-            <v-window-item value="screens">
-                <ScreensView :data="receivedData" :receivedHistory="receivedHistory"></ScreensView>
+            <v-window-item v-if="state.connected" value="screens">
+                <ScreensView  :data="receivedData" :receivedHistory="receivedHistory"></ScreensView>
             </v-window-item>
-            <v-window-item value="graph" v-if="curNum">
+            <v-window-item v-if="state.connected" value="graph">
                 <GraphView :data="receivedData" :receivedHistory="receivedHistory"></GraphView>
             </v-window-item>
-            <v-window-item value="log">
+            <v-window-item v-if="state.connected" value="log">
                 <LogView :data="receivedData" :receivedHistory="receivedHistory" @clear="receivedHistory = []; curNum = 0"></LogView>
             </v-window-item>
-            <v-window-item value="settings">
+            <v-window-item v-if="state.connected" value="settings">
                 <SettingsView :data="receivedData" :receivedHistory="receivedHistory"></SettingsView>
             </v-window-item>
         </v-window>
@@ -35,6 +35,8 @@ import GraphView    from "./components/GraphView.vue"
 import LogView      from "./components/LogView.vue"
 import SettingsView from "./components/SettingsView.vue"
 
+import { useState } from "@/stores/stateStore";
+
 export default {
     name: "App",
     components: {
@@ -43,6 +45,12 @@ export default {
         GraphView,
         LogView,
         SettingsView
+    },
+    setup() {
+        const state = useState()
+        return {
+            state
+        }
     },
     data: function () { 
         return {
@@ -61,6 +69,11 @@ export default {
                 this.curNum++
                 this.receivedHistory.unshift({id: this.curNum, data: data})
             })
+    },
+    watch: {
+        "state.settings": function() {
+            this.wsm.controller.send("changeSettings", {settings: this.state.settings})
+        }
     }
 }
 </script>

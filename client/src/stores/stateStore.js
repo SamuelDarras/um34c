@@ -6,6 +6,8 @@ export const useState = defineStore('state', {
   state: () => {
     return {
       scanning: false,
+      connected: false,
+      state: undefined
     }
   }
 })

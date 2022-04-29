@@ -68,6 +68,10 @@ async function main() {
             .on("nextScreen", data => {
                 controller.device.next()
             })
+            .on("changeSettings", data => {
+                controller.device.setBrightness(data.brightness)
+                controller.device.setTimeout(data.timeout)
+            })
 
         ws.on('error',function(e){ return console.log(e)})
         ws.on('close',function(e){ return console.log('websocket closed', e)})

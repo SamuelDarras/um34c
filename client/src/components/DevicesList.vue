@@ -86,15 +86,18 @@ export default {
                 default:
                     break
                 }
-                console.log(this.state)
-                })
+            })
             .on("success", (data) => {
                 switch (data.what) {
                 case "scanning":
                     this.state.scanning = false
+                    this.state.connected = true
                     break
                 case "connect":
                     this.connectedAddr = data.addr
+                    break
+                case "disconnect":
+                    this.state.connected = false
                     break
 
                 default:
