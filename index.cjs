@@ -70,13 +70,8 @@ async function main() {
                 controller.device.next()
             })
             .on("changeSettings", data => {
-                controller.device.readEvery(0)
-                setTimeout(() => {
-                    controller.device.setBrightness(data.settings.brightness)
-                    controller.device.setTimeout(data.settings.timeout)
-                    
-                    setTimeout(() => controller.device.readEvery(controller.device.rate), 1000)
-                }, 800)
+                controller.device.setBrightness(data.settings.brightness)
+                controller.device.setTimeout(data.settings.timeout)
             })
             .on("readOn", () => {
                 controller.device.readEvery(controller.device.rate)
