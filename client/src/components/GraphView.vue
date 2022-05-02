@@ -95,7 +95,7 @@ export default {
   },
   methods: {
     changeRate() {
-      this.wsm.controller.send("changeRate", { rate: this.rate });
+      this.wsm.controller.send("changeRate", { rate: parseInt(this.rate) });
     },
   },
   watch: {
