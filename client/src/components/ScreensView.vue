@@ -57,17 +57,18 @@
             </v-container>
 
             <v-container v-else-if="data.screen == 3">
+                <!-- What is this ? -->
                 <v-row>
-                    <v-col>{{ data.record.current }} mAh</v-col>
+                    <v-col>{{ data.voltage }} V</v-col>
                 </v-row>
                 <v-row>
-                    <v-col>{{ data.record.power }} mWh</v-col>
+                    <v-col>{{ 0 }} A</v-col>
                 </v-row>
                 <v-row>
-                    <v-col>Temps: {{ data.record.time }}</v-col>
+                    <v-col>{{ data.voltage }} V</v-col>
                 </v-row>
                 <v-row>
-                    <v-col>Seuil: {{ data.record.threshold }} V</v-col>
+                    <v-col>{{ data.current }} A</v-col>
                 </v-row>
             </v-container>
 
