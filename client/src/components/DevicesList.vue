@@ -41,7 +41,7 @@
                     color="success"
                 >
                 </v-btn>
-                <v-switch v-model="read" v-if="state.connected" color="primary" label="Lire"></v-switch>
+                <v-switch v-model="state.read" v-if="state.connected" color="primary" label="Lire"></v-switch>
                 </th>
             </tr>
             </tbody>
@@ -64,7 +64,6 @@ export default {
         return {
             devices: [],
             connectedAddr: "",
-            read: true,
         }
     },
     setup() {
@@ -110,7 +109,7 @@ export default {
             })
     },
     watch: {
-        read(new_v) {
+        "state.read": function(new_v) {
             if (new_v) this.wsm.controller.send("readOn", null)
             else this.wsm.controller.send("readOff", null)
         }
