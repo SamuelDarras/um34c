@@ -2,6 +2,10 @@
   <v-card class="ma-6">
     <v-card-title> Graphe </v-card-title>
     <v-card-text>
+      <div class="d-flex">
+        <v-switch v-model="read" color="primary" label="Lire"></v-switch>
+        <v-text-field v-model="rate" suffix="secondes"></v-text-field>
+      </div>
       <apexchart
         width="1000"
         type="line"
@@ -57,6 +61,8 @@ export default {
           },
         ],
       },
+      read: true,
+      rate: 1,
       series: [],
     };
   },
@@ -77,6 +83,10 @@ export default {
         },
       ];
     },
+    read(new_v) {
+        if (new_v) this.wsm.controller.send("readOn", null)
+        else this.wsm.controller.send("readOff", null)
+    }
   },
 };
 </script>
