@@ -71,11 +71,18 @@ async function main() {
             })
             .on("changeSettings", data => {
                 controller.device.readEvery(0)
-
-                controller.device.setBrightness(data.settings.brightness)
-                controller.device.setTimeout(data.settings.timeout)
-
-                setTimeout(() => controller.device.readEvery(controller.device.rate), 400)
+                setTimeout(() => {
+                    controller.device.setBrightness(data.settings.brightness)
+                    controller.device.setTimeout(data.settings.timeout)
+                    
+                    setTimeout(() => controller.device.readEvery(controller.device.rate), 1000)
+                }, 800)
+            })
+            .on("readOn", () => {
+                controller.device.readEvery(controller.device.rate)
+            })
+            .on("readOff", () => {
+                controller.device.readEvery(0)
             })
 
         ws.on('error',function(e){ return console.log(e)})

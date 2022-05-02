@@ -23,11 +23,12 @@
                 <th>
                 {{ device.name }}
                 </th>
-                <th>
+                <th class="d-flex">
                 <v-btn
                     v-if="device.address != connectedAddr"
                     icon="mdi-bluetooth"
                     size="x-small"
+                    class="ma-3"
                     @click="wsm.connect(device.address)"
                     color="primary"
                 >
@@ -36,9 +37,11 @@
                     v-else
                     icon="mdi-bluetooth-connect"
                     size="x-small"
+                    class="ma-3"
                     color="success"
                 >
                 </v-btn>
+                <v-switch v-model="read" v-if="state.connected" color="primary" label="Lire"></v-switch>
                 </th>
             </tr>
             </tbody>
@@ -61,6 +64,7 @@ export default {
         return {
             devices: [],
             connectedAddr: "",
+            read: true,
         }
     },
     setup() {
@@ -91,9 +95,9 @@ export default {
                 switch (data.what) {
                 case "scanning":
                     this.state.scanning = false
-                    this.state.connected = true
                     break
                 case "connect":
+                    this.state.connected = true
                     this.connectedAddr = data.addr
                     break
                 case "disconnect":
@@ -105,6 +109,12 @@ export default {
                 }
             })
     },
+    watch: {
+        read(new_v) {
+            if (new_v) this.wsm.controller.send("readOn", null)
+            else this.wsm.controller.send("readOff", null)
+        }
+    }
 }
 </script>
 
