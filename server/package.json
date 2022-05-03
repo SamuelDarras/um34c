@@ -12,6 +12,7 @@
   "dependencies": {
     "@vue/cli": "^5.0.4",
     "bluetooth-classic-serialport-client": "^0.1.25",
+    "json2csv": "^5.0.7",
     "ws": "^8.5.0"
   }
 }
