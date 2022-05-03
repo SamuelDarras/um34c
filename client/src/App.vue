@@ -67,7 +67,7 @@ export default {
                 
                 if (this.receivedHistory.length > 500) this.receivedHistory.pop()
                 this.curNum++
-                this.receivedHistory.unshift({id: this.curNum, data: data})
+                this.receivedHistory.unshift(this.receivedData)
             })
     },
     watch: {

@@ -1,5 +1,8 @@
 const { Controller } = require("./controller.cjs")
+const { Recorder } = require("./recorder.cjs")
 const site = require("./server.cjs")
+
+let recorder = new Recorder()
 
 async function main() {
     let isReady = false
@@ -37,9 +40,9 @@ async function main() {
                     .then(device => {
                         controller.success("connect", {addr: data.addr})
                         device.on("read", data => {
-                            controller.send("data", data)
+                            controller.send("data", recorder.append(data))
                         })
-                        device.readEvery(1000)
+                        // device.readEvery(1000)
                     })
                     .catch(err => {
                         console.error(err)
@@ -78,6 +81,7 @@ async function main() {
             })
             .on("readOff", () => {
                 controller.device.readEvery(0)
+                recorder.new()
             })
 
         ws.on('error',function(e){ return console.log(e)})
