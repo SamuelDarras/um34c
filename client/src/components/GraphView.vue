@@ -9,7 +9,8 @@
           :rules="[!isNaN(parseInt(rate)) || 'La valeur doit être un nombre']"
           suffix="millisecondes"
         ></v-text-field>
-        <v-btn color="success" @click="changeRate()">Appliquer</v-btn>
+        <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
+        <v-btn color="success" class="ml-3" @click="exportData()">Exporter</v-btn>
       </div>
       <div class="d-flex">
         <apexchart
@@ -97,6 +98,9 @@ export default {
     changeRate() {
       this.wsm.controller.send("changeRate", { rate: parseInt(this.rate) });
     },
+    exportData() {
+      this.wsm.controller.send("export", null)
+    }
   },
   watch: {
     data() {
