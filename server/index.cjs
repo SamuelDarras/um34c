@@ -97,9 +97,6 @@ async function main() {
                         ],
                     }
                     let parser = new Parser(options)
-                    console.log(data)
-                    // data = parser.preprocessData(data)
-                    // console.log(data)
                     let csv = parser.parse(data)
                     console.log(csv)
                 })
