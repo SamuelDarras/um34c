@@ -41,7 +41,7 @@
                     color="success"
                 >
                 </v-btn>
-                <v-switch v-model="state.read" v-if="state.connected" color="primary" label="Lire"></v-switch>
+                <ReadSwitch></ReadSwitch>
                 </th>
             </tr>
             </tbody>
@@ -55,11 +55,16 @@
 </template>
 
 <script>
+import ReadSwitch from "@/components/ReadSwitch.vue"
+
 import { useState } from "@/stores/stateStore";
 
 export default {
     name: "DevicesList",
     props: ["data"],
+    components: {
+        ReadSwitch
+    },
     data() {
         return {
             devices: [],
@@ -108,12 +113,12 @@ export default {
                 }
             })
     },
-    watch: {
-        "state.read": function(new_v) {
-            if (new_v) this.wsm.controller.send("readOn", null)
-            else this.wsm.controller.send("readOff", null)
-        }
-    }
+    // watch: {
+    //     "state.read": function(new_v) {
+    //         if (new_v) this.wsm.controller.send("readOn", null)
+    //         else this.wsm.controller.send("readOff", null)
+    //     }
+    // }
 }
 </script>
 

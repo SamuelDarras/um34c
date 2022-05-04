@@ -3,7 +3,7 @@
     <v-card-title> Graphe </v-card-title>
     <v-card-text>
       <div class="d-flex">
-        <v-switch v-model="state.read" color="primary" label="Lire"></v-switch>
+        <ReadSwitch></ReadSwitch>
         <v-text-field
           v-model="rate"
           :rules="[!isNaN(parseInt(rate)) || 'La valeur doit être un nombre']"
@@ -43,21 +43,15 @@
 
 <script>
 import VueApexCharts from "vue3-apexcharts";
-
-import { useState } from "@/stores/stateStore";
+import ReadSwitch from "@/components/ReadSwitch.vue"
 
 export default {
   name: "GraphView",
   components: {
     apexchart: VueApexCharts,
+    ReadSwitch
   },
   props: ["data", "receivedHistory"],
-  setup() {
-    const state = useState();
-    return {
-      state,
-    };
-  },
   data: () => {
     return {
       chartOptions: {
@@ -99,8 +93,8 @@ export default {
       this.wsm.controller.send("changeRate", { rate: parseInt(this.rate) });
     },
     exportData() {
-      this.wsm.controller.send("export", null)
-    }
+      this.wsm.controller.send("export", null);
+    },
   },
   watch: {
     data() {
@@ -118,10 +112,6 @@ export default {
           }),
         },
       ];
-    },
-    "state.read": function(new_v) {
-      if (new_v) this.wsm.controller.send("readOn", null);
-      else this.wsm.controller.send("readOff", null);
     },
   },
 };
