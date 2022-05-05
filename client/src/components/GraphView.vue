@@ -10,7 +10,6 @@
           suffix="millisecondes"
         ></v-text-field>
         <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
-        <v-btn color="success" class="ml-3" @click="exportData()">Exporter</v-btn>
       </div>
       <div class="d-flex">
         <apexchart
@@ -37,7 +36,10 @@
         </v-table>
       </div>
     </v-card-text>
-    <v-card-actions> </v-card-actions>
+    <v-card-actions>
+        <v-btn color="success" class="ml-3" @click="exportData()">Exporter</v-btn>
+        <v-text-field v-model="exportFields"></v-text-field>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -86,6 +88,7 @@ export default {
       },
       rate: 1000,
       series: [],
+      exportFields: "",
     };
   },
   methods: {
@@ -93,7 +96,8 @@ export default {
       this.wsm.controller.send("changeRate", { rate: parseInt(this.rate) });
     },
     exportData() {
-      this.wsm.controller.send("export", { fields: ["timestamp.fromStart", "current"] });
+      let fields = this.exportFields.split(",").map(v => v.trim())
+      this.wsm.controller.send("export", { fields: fields });
     },
   },
   watch: {
