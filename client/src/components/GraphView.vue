@@ -93,7 +93,7 @@ export default {
       this.wsm.controller.send("changeRate", { rate: parseInt(this.rate) });
     },
     exportData() {
-      this.wsm.controller.send("export", null);
+      this.wsm.controller.send("export", { fields: ["timestamp.fromStart", "current"] });
     },
   },
   watch: {

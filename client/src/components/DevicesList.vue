@@ -41,7 +41,7 @@
                     color="success"
                 >
                 </v-btn>
-                <ReadSwitch></ReadSwitch>
+                <ReadSwitch v-if="state.connected"></ReadSwitch>
                 </th>
             </tr>
             </tbody>

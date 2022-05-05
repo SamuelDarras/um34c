@@ -84,14 +84,12 @@ async function main() {
             .on("readOff", () => {
                 controller.device.readEvery(0)
             })
-            .on("export", () => {
+            .on("export", data => {
+                recorder.fields = data.fields ? data.fields : ["timestamp.fromStart", "current", "voltage"]
+
                 recorder.export((data) => {
                     options = {
-                        fields: [
-                            "timestamp.fromStart",
-                            "current",
-                            "voltage"
-                        ],
+                        fields: recorder.fields,
                         transforms: [
                             flatten()
                         ],
