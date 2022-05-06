@@ -12,16 +12,16 @@
             <v-window-item value="devicesList">
                 <DevicesList :data="receivedData"></DevicesList>
             </v-window-item>
-            <v-window-item v-if="state.connected" value="screens">
-                <ScreensView  :data="receivedData" :receivedHistory="receivedHistory"></ScreensView>
+            <v-window-item v-if="state.received" value="screens">
+                <ScreensView  :data="receivedData.data" :receivedHistory="receivedHistory"></ScreensView>
             </v-window-item>
-            <v-window-item v-if="state.connected" value="graph">
+            <v-window-item v-if="state.received" value="graph">
                 <GraphView :data="receivedData" :receivedHistory="receivedHistory"></GraphView>
             </v-window-item>
-            <v-window-item v-if="state.connected" value="log">
+            <v-window-item v-if="state.received" value="log">
                 <LogView :data="receivedData" :receivedHistory="receivedHistory" @clear="receivedHistory = []; curNum = 0"></LogView>
             </v-window-item>
-            <v-window-item v-if="state.connected" value="settings">
+            <v-window-item v-if="state.received" value="settings">
                 <SettingsView :data="receivedData" :receivedHistory="receivedHistory"></SettingsView>
             </v-window-item>
         </v-window>
@@ -63,6 +63,7 @@ export default {
     created: function() {
         this.wsm.controller
             .on("data", data => {
+                if (!this.state.received) this.state.received = true
                 this.receivedData = data
                 
                 if (this.receivedHistory.length > 500) this.receivedHistory.pop()

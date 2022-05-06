@@ -1,6 +1,8 @@
+const { Parser, transforms: { flatten } } = require("json2csv")
+const fs = require("fs")
+
 const { Controller } = require("./controller.cjs")
 const { Recorder } = require("./recorder.cjs")
-const { Parser, transforms: { flatten } } = require("json2csv")
 const site = require("./server.cjs")
 
 let recorder = new Recorder()
@@ -86,6 +88,7 @@ async function main() {
             })
             .on("export", data => {
                 recorder.fields = data.fields ? data.fields : ["timestamp.fromStart", "current", "voltage"]
+                let path = data.path ? data.path : "export.csv"
 
                 recorder.export((data) => {
                     options = {
@@ -97,6 +100,11 @@ async function main() {
                     let parser = new Parser(options)
                     let csv = parser.parse(data)
                     console.log(csv)
+
+                    fs.writeFile(path, csv, err => {
+                        if (err) controller.error(err, "export")
+                        else controller.success("exportDone")
+                    })
                 })
             })
 

@@ -7,6 +7,7 @@ export const useState = defineStore('state', {
     return {
       scanning: false,
       connected: false,
+      received: false,
       reading: true,
     }
   }
