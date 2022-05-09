@@ -45,7 +45,6 @@ async function main() {
                         device.on("read", data => {
                             controller.send("data", recorder.append(data))
                         })
-                        // device.readEvery(1000)
                     })
                     .catch(err => {
                         console.error(err)
@@ -56,9 +55,8 @@ async function main() {
                 controller.disconnect()
                     .then(() => {
                         controller.success("disconnect")
-                        // process.exit(1)
                     })
-                    .catch(err => controller.error(err, "disconnect"))
+                    .catch(err => { console.error(err); controller.error(err, "disconnect") })
             })
             .on("changeRate", data => {
                 if (controller.device !== null) {
