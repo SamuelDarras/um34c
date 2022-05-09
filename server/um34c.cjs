@@ -155,7 +155,6 @@ class UM34C extends EventEmitter {
 
     terminate() {
         this.readEvery(0)
-        if (this._interval !== null) clearInterval(this._interval)
         return this.serial.close()
     }
 }
