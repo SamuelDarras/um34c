@@ -96,6 +96,12 @@ export default {
     apexchart: VueApexCharts,
     ReadSwitch
   },
+  setupt() {
+    this.wsm.controller.on("exportFile", data => {
+      console.log(data)
+    })
+    return {}
+  },
   props: ["data", "receivedHistory"],
   data: () => {
     return {

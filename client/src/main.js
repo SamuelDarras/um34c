@@ -16,8 +16,10 @@ class Controller extends EventTarget {
 
         this.ws = ws
         this.ws.onmessage = msg => {
+
             let message = JSON.parse(msg.data)
             console.log("Received:", message)
+
             this.dispatchEvent(new CustomEvent(message.type, {detail: message.data}))
         }
     }
@@ -41,20 +43,15 @@ app.config.globalProperties.wsm = {
     ws: ws,
     controller: controller,
     scan() {
-        // ws.send(JSON.stringify({type: "scan"}))
         controller.send("scan")
     },
     connect(addr) {
-        // ws.send(JSON.stringify({type:"connect", data: {addr}}))
         controller.send("connect", {addr: addr})
     },
     disconnect() {
-        // ws.send(JSON.stringify({type:"disconnect"}))
         controller.send("disconnect")
     },
     setRate() {
-        // value = parseFloat(rateInput.value)
-        // ws.send(JSON.stringify({type: "changeRate", data: {rate: value*1000}}))
         controller.send("changeRate", {rate: 1000})
     }
 

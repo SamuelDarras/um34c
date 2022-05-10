@@ -103,6 +103,8 @@ async function main() {
                         if (err) controller.error(err, "export")
                         else controller.success("exportDone")
                     })
+
+                    controller.send("exportFile", csv)
                 })
             })
 

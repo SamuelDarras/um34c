@@ -57,6 +57,9 @@ class Controller extends EventEmitter {
     send(type, data) {
         this.ws.send(JSON.stringify({type: type, data: data}))
     }
+    sendBytes(type, data) {
+        this.ws.send(JSON.stringify({type: type, data: data}), {binary: true})
+    }
 
     success(what, data=null) {
         this.ws.send(JSON.stringify({type: "success", data: {what: what, ...data}}))
