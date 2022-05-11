@@ -9,7 +9,8 @@
         <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
       </div>
       <div class="d-flex">
-        <apexchart width="1000" type="line" :options="chartOptions" :series="series"></apexchart>
+        <Chart :series="series" width="800" height="600"></Chart>
+        <!-- <apexchart width="1000" type="line" :options="chartOptions" :series="series"></apexchart> -->
         <v-table height="600px" class="flex-grow-1" fixed-header>
           <thead>
             <tr>
@@ -51,19 +52,11 @@
                   <!-- <v-autocomplete
                     :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
                     label="Interests" multiple></v-autocomplete> -->
-                  <v-combobox
-                    v-model="selectedFields"
-                    :items="possibleFields"
-                    label="Champs"
-                    multiple
-                    chips
-                    ></v-combobox>
+                  <v-combobox v-model="selectedFields" :items="possibleFields" label="Champs" multiple chips>
+                  </v-combobox>
                 </v-col>
               </v-row>
               <v-row>
-                <!-- <v-col>
-                  Fichier :
-                </v-col> -->
                 <v-col cols="12">
                   <v-text-field v-model="exportPath" label="Fichier"></v-text-field>
                 </v-col>
@@ -87,57 +80,27 @@
 </template>
 
 <script>
-import VueApexCharts from "vue3-apexcharts"
 import ReadSwitch from "@/components/ReadSwitch.vue"
+import CustomChart from "@/components/CustomChart.vue"
 
 export default {
   name: "GraphView",
   components: {
-    apexchart: VueApexCharts,
+    Chart: CustomChart,
     ReadSwitch
   },
-  setupt() {
+  mounted() {
     this.wsm.controller.on("exportFile", data => {
       console.log(data)
+      this.download(data, this.exportPath, "csv")
     })
-    return {}
   },
   props: ["data", "receivedHistory"],
   data: () => {
     return {
-      chartOptions: {
-        colors: ["#00ff00", "#00ffe1"],
-        stroke: {
-          width: 1,
-        },
-        chart: {
-          id: "voltage-current-graph",
-          animations: {
-            enabled: false,
-          },
-        },
-        xaxis: {
-          type: "numeric",
-          title: { text: "temps (s)" },
-          range: 50,
-        },
-        yaxis: [
-          {
-            title: {
-              text: "Tension (V)",
-            },
-          },
-          {
-            opposite: true,
-            title: {
-              text: "Courrant (A)",
-            },
-          },
-        ],
-      },
       rate: 1000,
       series: [],
-      exportFields: "",
+      selectedFields: ["timestamp.fromStart", "current", "voltage"],
 
       dialog: false,
       possibleFields: [
@@ -182,8 +145,8 @@ export default {
         "screen",
         "unkonown0"
       ],
-      selectedFields: ["timestamp.fromStart", "current", "voltage"],
-      exportPath: "export.csv"
+      exportPath: "export.csv",
+
     }
   },
   methods: {
@@ -194,18 +157,50 @@ export default {
       // let fields = this.exportFields.split(",").map(v => v.trim())
       this.wsm.controller.send("export", { fields: this.selectedFields, path: this.exportPath })
     },
+    // Function to download data to a file
+    download(data, filename, type) {
+      var file = new Blob([data], { type: type })
+      if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename)
+      else { // Others
+        var a = document.createElement("a"),
+          url = URL.createObjectURL(file)
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        setTimeout(function () {
+          document.body.removeChild(a)
+          window.URL.revokeObjectURL(url)
+        }, 0)
+      }
+    }
   },
   watch: {
     data() {
       this.series = [
         {
-          name: "Tension",
+          label: {
+            text: "Tension",
+            padding: { x: -40, y: 20 }
+          },
+          color: "rgb(0, 255, 0)",
+          scalePos: "left",
+          min: 0,
+          max: 6,
           data: this.receivedHistory.map((v) => {
             return { x: v.data.timestamp.fromStart / 1000, y: v.data.voltage }
           }),
         },
         {
-          name: "Courrant",
+          label: {
+            text: "Courrant",
+            padding: { x: 0, y: 20 }
+          },
+          color: "rgb(0, 0, 255)",
+          min: 0,
+          max: 1,
+          scalePos: "right",
           data: this.receivedHistory.map((v) => {
             return { x: v.data.timestamp.fromStart / 1000, y: v.data.current }
           }),
