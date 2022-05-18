@@ -84,10 +84,12 @@ async function main() {
             .on("readOff", () => {
                 controller.device.readEvery(0)
             })
-            .on("export", data => {
-                recorder.fields = data.fields ? data.fields : ["timestamp.fromStart", "current", "voltage"]
-                let path = data.path ? data.path : "export.csv"
+            .on("export", settings => {
+                recorder.fields = settings.fields ? settings.fields : ["timestamp.fromStart", "current", "voltage"]
+                let path = settings.path ? settings.path : "export.csv"
 
+                
+                
                 recorder.export((data) => {
                     options = {
                         fields: recorder.fields,
@@ -96,7 +98,12 @@ async function main() {
                         ],
                     }
                     let parser = new Parser(options)
-                    let csv = parser.parse(data)
+                    let csv
+                    if (settings.span !== undefined) {
+                        csv = parser.parse(data.filter(v => v["timestamp.fromStart"]/1000 >= settings.span[0] && v["timestamp.fromStart"]/1000 <= settings.span[1]))
+                    } else {
+                        csv = parser.parse(data)
+                    }
                     console.log(csv)
 
                     fs.writeFile(path, csv, err => {

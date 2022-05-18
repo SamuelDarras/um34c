@@ -1,194 +1,251 @@
 <template>
-    <canvas ref="graphCanvas" :width="width" :height="height"></canvas>
+    <canvas ref="graphCanvas" :width="width" :height="height" @mousedown="mouseStart" @mousemove="mouseMove" @mouseup="mouseEnd"></canvas>
+    <v-btn icon="mdi-home" @click="resetScale" color="success"></v-btn>
 </template>
 
 <script>
 
 export default {
     name: "CustomChart",
-    props: ["series", "width", "height"],
+    emits: ["windowSet"],
+    props: ["plot", "width", "height"],
     mounted() {
-        console.log(this.series)
-
-        this.canvasCtx = this.$refs["graphCanvas"].getContext("2d")
-        console.log(this.canvasCtx)
+        this.canvas = this.$refs["graphCanvas"]
+        this.canvasCtx = this.canvas.getContext("2d")
 
         this.canvasCtx.fillStyle = "rgb(255, 0, 0, 0.5)"
 
+        this.padding    = Math.max(this.width, this.height) * 0.05
+        this.drawWidth  = this.width  - this.padding*2
+        this.drawHeight = this.height - this.padding*2
     },
+
     data() {
         return {
-            ctx: undefined,
-            padding: 50,
-            pontsRadius: 2,
-            span: {
-                values: 50,
-                from: 0
-            }
+            scaleX:  1,
+            offsetX: 0,
+            scaleY:  1,
+            offsetY: 0,
+            values: 300,
+
+            scalesSteps: 20,
+
+            mouseClicked: false,
+            mouseStartPos: {x: 0, y: 0},
+            mouseEndPos: {x: 0, y: 0},
+            rawPlot: undefined
         }
     },
+
     watch: {
-        series(new_v) {
-            this.canvasCtx.clearRect(0, 0, this.width, this.height)
-                
-            for (let serie of new_v) {
-                let Xs = serie.data.map(p => p.x).slice(this.span.from, this.span.from + this.span.values)
-                let minX = Math.min(...Xs)
-                let maxX = Math.max(...Xs)
-
-                let Ys = serie.data.map(p => p.y).filter((_, idx) => idx < this.span.from + this.span.values)
-                // let minY = Math.min(...Ys)
-                // let maxY = Math.max(...Ys)
-                let minY = serie.min
-                let maxY = serie.max
-
-                // minY -= (maxY-minY) * .1
-                // maxY += (maxY-minY) * .1
-                
-
-                let scaled_points = Xs.map(
-                    (v, idx) => {
-                        return {
-                            x: this.scale(v, minX, maxX, this.padding, this.width - this.padding),
-                            y: this.height - this.scale(Ys[idx], minY, maxY, this.padding, this.height - this.padding)
-                        }
-                })
-
-                let x_from = 0
-                let y_from = 0
-                let x_to   = 0
-                let y_to   = 0
-                switch (serie.scalePos) {
-                    case "left":
-                        x_from = this.padding
-                        y_from = this.height - this.padding
-                        x_to   = this.padding
-                        y_to   = this.padding
-                        break
-                    case "right":
-                        x_from = this.width - this.padding
-                        y_from = this.height - this.padding
-                        x_to   = this.width - this.padding
-                        y_to   = this.padding
-                        break
-                    case "bottom":
-                        x_from = this.height - this.padding
-                        y_from = this.height - this.padding
-                        x_to   = this.width - this.padding
-                        y_to   = this.height - this.padding
-                        break
-                    case "top":
-                        x_from = this.padding
-                        y_from = this.padding
-                        x_to   = this.width - this.padding
-                        y_to   = this.padding
-                        break
-                }
-
-                this.drawScale({
-                        from: {
-                            x: x_from,
-                            y: y_from
-                        },
-                        to: {
-                            x: x_to,
-                            y: y_to
-                        },
-                        min: minY,
-                        max: maxY,
-                        color: serie.color,
-                        precision: 3,
-                        label: serie.label
-                    }, 10)
-
-                this.drawScale({
-                        from: {
-                            x: this.padding,
-                            y: this.height - this.padding
-                        },
-                        to: {
-                            x: this.width - this.padding,
-                            y: this.height - this.padding
-                        },
-                        min: minX,
-                        max: maxX,
-                        color: "rgb(0, 0, 0)",
-                        padding: {
-                            x: 0, y: 10
-                        },
-                        precision: 0,
-                        label: {
-                            text: "Temps (s.)",
-                            padding: { x: this.width/2, y: 20 }
-                        }
-                    }, 10)
-
-                this.canvasCtx.strokeStyle = serie.color
-                this.canvasCtx.fillStyle = serie.color
-                this.canvasCtx.beginPath()
-                this.canvasCtx.moveTo(scaled_points[0].x, scaled_points[0].y)
-                for (let point of scaled_points) {
-                    this.canvasCtx.lineTo(point.x, point.y)
-                }
-                this.canvasCtx.stroke()
-                this.canvasCtx.closePath()
-
-                this.canvasCtx.moveTo(scaled_points[0].x, scaled_points[0].y)
-                for (let point of scaled_points) {
-                    this.canvasCtx.beginPath()
-                    this.canvasCtx.arc(point.x, point.y, this.pontsRadius, 0, Math.PI*2)
-                    this.canvasCtx.fill()
-                }
-
-            }
+        plot(new_v) {
+            this.calcSeries(new_v)
         }
     },
     methods: {
-        scale(v, min, max, to_min, to_max) {
-            return (v-min)/(max-min) * (to_max-to_min) + to_min
-        },
-        drawScale(settings, steps) {
-            console.log(settings)
-            settings = {
-                from: {x: 0, y: 0}, to: {x: 0, y: 0},
-                min: 0, max: 1,
-                padding: {x: 5, y: 0},
-                color: "rgb(0, 0, 0)", precision: 5,
-                label: {
-                    text: "serie",
-                    padding: {
-                        x: 5, y: 0
+        calcSeries(plot) {
+            this.series = JSON.parse(JSON.stringify(plot)).series
+
+            this.series.forEach(serie => {
+                serie.data = serie.data.filter((_, idx) => idx < this.values)
+
+                let minx = Math.min(...serie.data.map(p => p.x))
+                let maxx = Math.max(...serie.data.map(p => p.x))
+
+                serie.data = serie.data.map(point => {
+                    return {
+                        x: this.mapX(point.x, minx, maxx),
+                        y: this.mapY(point.y, serie.span[0], serie.span[1])
                     }
-                },
-                ...settings
+                })
+
+                serie.data = serie.data.filter(p => p.x >= this.padding && p.y <= this.width-this.padding)
+                
+                minx = this.plot.series[0].data[serie.data.length-1].x
+                maxx = this.plot.series[0].data[0].x
+                this.tMin = minx
+                this.tMax = maxx
+            })
+
+            this.updateCanvas()
+
+        },
+        mapX(v, min, max) {
+            return ((this.drawWidth) * (v-min) / (max-min)) * this.scaleX + this.offsetX + this.padding
+        },
+        mapY(v, min, max) {
+            return (this.height - (this.drawHeight) * (v-min) / (max-min)) * this.scaleY + this.offsetY - this.padding
+        },
+
+        updateCanvas() {
+            this.canvasCtx.fillStyle = "rgb(235, 235, 235)"
+            this.canvasCtx.fillRect(0, 0, this.width, this.height)
+            
+            this.drawGrid()
+
+            for (let serie of this.series) {
+                this.canvasCtx.strokeStyle = serie.color
+                this.canvasCtx.fillStyle = serie.color
+                this.canvasCtx.beginPath()
+                for (let point of serie.data) {
+                    if (point.x < this.padding || point.x > this.width-this.padding) continue
+                    let x = point.x
+                    let y = point.y
+                    this.canvasCtx.lineTo(x, y)
+                }
+                this.canvasCtx.stroke()
+                this.canvasCtx.closePath()
+                
+                for (let point of serie.data) {
+                    if (point.x < this.padding || point.x > this.width-this.padding) continue
+
+                    this.canvasCtx.beginPath()
+                    let x = point.x
+                    let y = point.y
+                    this.canvasCtx.arc(x, y, 2, 0, Math.PI*2)
+                    this.canvasCtx.fill()
+                }
+                
+                if (serie.leftScale !== undefined) {
+                    this.drawScale(this.padding, this.height-this.padding, this.padding, this.padding, serie.span, serie.leftScale, -40, 4)
+                }
+                if (serie.rightScale !== undefined) {
+                    this.drawScale(this.width-this.padding, this.height-this.padding, this.width-this.padding, this.padding, serie.span, serie.rightScale, 10, 4)
+                }
             }
 
+            this.canvasCtx.fillStyle = "#000000"
+            this.drawScale(this.padding, this.height-this.padding, this.width-this.padding, this.height-this.padding, [this.tMin, this.tMax], {label: "Temps (s.)", offY: 30}, -5, 20)
 
-            this.canvasCtx.save()
+            if (this.mouseEndPos !== undefined)
+                this.drawSelect()
+        },
 
+        drawScale(x1, y1, x2, y2, span, info, valuesOffsetX, valuesOffsetY) {
+            info = { label: "label", offX: -20, offY: -20, ...info }
+
+            let angle = Math.atan((y2-y1)/(x2-x1))
+
+            this.canvasCtx.strokeStyle = "#000000"
             this.canvasCtx.beginPath()
+            this.canvasCtx.moveTo(x1, y1)
+            this.canvasCtx.lineTo(x2, y2)
 
-            this.canvasCtx.strokeStyle = "rgb(0, 0, 0)"
-            this.canvasCtx.fillStyle = settings.color
-            this.canvasCtx.font = "10px sans-serif"
-            this.canvasCtx.moveTo(settings.from.x, settings.from.y)
-            this.canvasCtx.lineTo(settings.to.x, settings.to.y)
-
-            for (let i = 0; i <= steps; i += 1) {
-                this.canvasCtx.fillText(
-                    (settings.min + i*(settings.max-settings.min)/steps).toFixed(settings.precision),
-                    settings.padding.x + settings.from.x + i*(settings.to.x-settings.from.x)/steps,
-                    settings.padding.y + settings.from.y + i*(settings.to.y-settings.from.y)/steps
-                )
+            for (let i = 0; i <= this.scalesSteps; i++) {
+                let x = (x2-x1) * i/this.scalesSteps + x1
+                let y = (y2-y1) * i/this.scalesSteps + y1
+                this.drawDash(x, y, angle, 6)
+                let text = ((span[1]-span[0]) * i/this.scalesSteps + span[0]).toPrecision(4)
+                this.canvasCtx.fillText(text, x+valuesOffsetX, y+valuesOffsetY)
             }
-            this.canvasCtx.fillText(settings.label.text, settings.from.x + settings.label.padding.x, settings.from.y + settings.label.padding.y)
 
             this.canvasCtx.stroke()
-            this.canvasCtx.fill()
+            this.canvasCtx.closePath()
 
+            this.canvasCtx.fillText(info.label, x2 + info.offX, y2 + info.offY)
+        },
+        drawDash(x, y, angle, length) {
+            angle -= Math.PI/2
+
+            let x1 = x - Math.cos(angle)*length/2
+            let y1 = y - Math.sin(angle)*length/2
+            let x2 = x + Math.cos(angle)*length/2
+            let y2 = y + Math.sin(angle)*length/2
+
+            this.canvasCtx.moveTo(x1, y1)
+            this.canvasCtx.lineTo(x2, y2)
+        },
+        drawGrid() {
+            this.canvasCtx.save()
+
+            this.canvasCtx.beginPath() 
+            this.canvasCtx.strokeStyle = "rgb(255, 255, 255)"
+            for (let i = 0; i <= this.scalesSteps; i++) {
+                this.canvasCtx.moveTo(
+                    this.padding,
+                    this.drawHeight * i/this.scalesSteps + this.padding
+                )
+                this.canvasCtx.lineTo(
+                    this.drawWidth + this.padding,
+                    this.drawHeight * i/this.scalesSteps + this.padding
+                )
+
+                this.canvasCtx.moveTo(
+                    this.drawWidth * i/this.scalesSteps + this.padding,
+                    this.drawHeight + this.padding
+                )
+                this.canvasCtx.lineTo(
+                    this.drawWidth * i/this.scalesSteps + this.padding,
+                    this.padding
+                )
+            }
+            this.canvasCtx.stroke()
             this.canvasCtx.closePath()
 
             this.canvasCtx.restore()
+        },
+        drawSelect() {
+            this.canvasCtx.fillStyle = "rgb(0, 30, 180, .1)"
+            this.canvasCtx.fillRect(this.mouseStartPos.x, this.padding, this.mouseEndPos.x - this.mouseStartPos.x, this.drawHeight)
+            this.canvasCtx.strokeStyle = "rgb(0, 30, 180)"
+            
+            this.canvasCtx.beginPath()
+            this.canvasCtx.moveTo(this.mouseStartPos.x, this.padding)
+            this.canvasCtx.lineTo(this.mouseStartPos.x, this.drawHeight + this.padding)
+            this.canvasCtx.moveTo(this.mouseEndPos.x, this.padding)
+            this.canvasCtx.lineTo(this.mouseEndPos.x, this.drawHeight + this.padding)
+            this.canvasCtx.stroke()
+            this.canvasCtx.closePath()
+        },
+
+        clamp(v, min, max) {
+            if (v >= max) return max
+            if (v <= min) return min
+            return v
+        },
+
+        mouseStart(e) {
+            var rect = this.canvas.getBoundingClientRect()
+            let posx = e.clientX - rect.left
+            let posy = e.clientY - rect.top
+
+            this.mouseStartPos = { x: posx, y: posy }
+            this.mouseEndPos = { x: posx, y: posy }
+
+            this.mouseClicked = true
+        },
+        mouseMove(e) {
+            if (this.mouseClicked) {
+                var rect = this.canvas.getBoundingClientRect()
+                let posx = e.clientX - rect.left
+                let posy = e.clientY - rect.top
+
+                this.mouseEndPos = { x: this.clamp(posx, this.padding, this.width-this.padding), y: posy }
+            }
+            this.updateCanvas()
+        },
+        mouseEnd() {
+            this.mouseClicked = false
+
+            // this.scaleX *= (this.drawWidth)/(Math.abs(this.mouseEndPos.x-this.mouseStartPos.x))
+            // this.offsetX -= this.mouseEndPos.x*this.scaleX - this.padding
+
+            this.calcSeries(this.plot)
+            this.updateCanvas()
+
+            this.$emit("windowSet", [
+                (this.tMax-this.tMin) * (this.mouseStartPos.x-this.padding)/this.drawWidth + this.tMin,
+                (this.tMax-this.tMin) * (this.mouseEndPos.x-this.padding)/this.drawWidth + this.tMin,
+            ])
+        },
+        resetScale() {
+            this.scaleX = 1
+            this.scaleY = 1
+            this.offsetX = 0
+            this.offsetY = 0
+
+            this.calcSeries(this.plot)
+            this.updateCanvas()
         }
     }
 }

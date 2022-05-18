@@ -9,7 +9,7 @@
         <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
       </div>
       <div class="d-flex">
-        <Chart :series="series" width="800" height="600"></Chart>
+        <Chart @windowSet="window = $event" :plot="plot" width="1200" height="600"></Chart>
         <!-- <apexchart width="1000" type="line" :options="chartOptions" :series="series"></apexchart> -->
         <v-table height="600px" class="flex-grow-1" fixed-header>
           <thead>
@@ -29,9 +29,8 @@
         </v-table>
       </div>
     </v-card-text>
+    
     <v-card-actions>
-      <!-- <v-btn color="success" class="ml-3" @click="exportData()">Exporter</v-btn> -->
-
       <v-dialog v-model="dialog">
         <template v-slot:activator="{ props }">
           <v-btn color="success" v-bind="props">
@@ -49,9 +48,6 @@
                   Champs à exporter :
                 </v-col>
                 <v-col cols="12" sm="16">
-                  <!-- <v-autocomplete
-                    :items="['Skiing', 'Ice hockey', 'Soccer', 'Basketball', 'Hockey', 'Reading', 'Writing', 'Coding', 'Basejump']"
-                    label="Interests" multiple></v-autocomplete> -->
                   <v-combobox v-model="selectedFields" :items="possibleFields" label="Champs" multiple chips>
                   </v-combobox>
                 </v-col>
@@ -80,6 +76,15 @@
 </template>
 
 <script>
+/**
+ * TODO:
+ *  - fenetre de selection,
+ *  - consommation sur la fenetre,
+ *  - db
+ * (- bug de deconnexion)
+ */
+
+
 import ReadSwitch from "@/components/ReadSwitch.vue"
 import CustomChart from "@/components/CustomChart.vue"
 
@@ -99,7 +104,7 @@ export default {
   data: () => {
     return {
       rate: 1000,
-      series: [],
+      plot: {},
       selectedFields: ["timestamp.fromStart", "current", "voltage"],
 
       dialog: false,
@@ -147,6 +152,7 @@ export default {
       ],
       exportPath: "export.csv",
 
+      window: undefined
     }
   },
   methods: {
@@ -155,7 +161,7 @@ export default {
     },
     exportData() {
       // let fields = this.exportFields.split(",").map(v => v.trim())
-      this.wsm.controller.send("export", { fields: this.selectedFields, path: this.exportPath })
+      this.wsm.controller.send("export", { fields: this.selectedFields, path: this.exportPath, span: this.window })
     },
     // Function to download data to a file
     download(data, filename, type) {
@@ -178,35 +184,34 @@ export default {
   },
   watch: {
     data() {
-      this.series = [
-        {
-          label: {
-            text: "Tension",
-            padding: { x: -40, y: 20 }
+      this.plot = {
+        series: [
+          {
+            color: "rgb(0, 190, 20)",
+            data: this.receivedHistory.map((v) => {
+              return { x: v.data.timestamp.fromStart / 1000, y: v.data.voltage }
+            }),
+            span: [0, 7],
+            leftScale: {
+              label: "Tension ()"
+            },
           },
-          color: "rgb(0, 255, 0)",
-          scalePos: "left",
-          min: 0,
-          max: 6,
-          data: this.receivedHistory.map((v) => {
-            return { x: v.data.timestamp.fromStart / 1000, y: v.data.voltage }
-          }),
-        },
-        {
-          label: {
-            text: "Courrant",
-            padding: { x: 0, y: 20 }
-          },
-          color: "rgb(0, 0, 255)",
-          min: 0,
-          max: 1,
-          scalePos: "right",
-          data: this.receivedHistory.map((v) => {
-            return { x: v.data.timestamp.fromStart / 1000, y: v.data.current }
-          }),
-        },
-      ]
+          {
+            color: "rgb(0, 20, 190)",
+            data: this.receivedHistory.map((v) => {
+              return { x: v.data.timestamp.fromStart / 1000, y: v.data.current }
+            }),
+            span: [-.01, .05],
+            rightScale: {
+              label: "Courrant (A)"
+            },
+          }
+        ],
+      }
     },
+    window(new_v) {
+      console.log(new_v)
+    }
   },
 }
 </script>

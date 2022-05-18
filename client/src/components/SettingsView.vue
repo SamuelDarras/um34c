@@ -44,7 +44,8 @@ export default {
     };
   },
   mounted() {
-    this.settings = this.data.settings;
+    this.settings = this.data.data.settings;
+    console.log(this.data)
   },
   methods: {
     applySettings() {
