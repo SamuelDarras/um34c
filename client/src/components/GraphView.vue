@@ -217,7 +217,7 @@ export default {
             }),
             span: [0, 7],
             leftScale: {
-              label: "Tension ()"
+              label: "Tension (V)"
             },
           },
           {

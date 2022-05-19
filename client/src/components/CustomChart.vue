@@ -236,9 +236,11 @@ export default {
             if (this.mouseEndPos.x == this.mouseStartPos.x) {
                 this.$emit("windowReset")
             } else {
+                let v1 = (this.tMax-this.tMin) * (this.mouseStartPos.x-this.padding)/this.drawWidth + this.tMin
+                let v2 = (this.tMax-this.tMin) * (this.mouseEndPos.x-this.padding)/this.drawWidth + this.tMin
                 this.$emit("windowSet", [
-                    (this.tMax-this.tMin) * (this.mouseStartPos.x-this.padding)/this.drawWidth + this.tMin,
-                    (this.tMax-this.tMin) * (this.mouseEndPos.x-this.padding)/this.drawWidth + this.tMin,
+                    Math.min(v1, v2),
+                    Math.max(v1, v2),
                 ])
             }
         },
