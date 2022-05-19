@@ -8,8 +8,12 @@
           suffix="millisecondes"></v-text-field>
         <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
       </div>
+      <div>
+        <p v-if="window !== undefined">Consomation durant la fenêtre: {{ consomation }} mAh</p>
+      </div>
       <div class="d-flex">
-        <Chart @windowSet="window = $event" :plot="plot" width="1200" height="600"></Chart>
+
+        <Chart @windowSet="window = $event" @windowReset="window = undefined" :plot="plot" width="1200" height="600"></Chart>
         <!-- <apexchart width="1000" type="line" :options="chartOptions" :series="series"></apexchart> -->
         <v-table height="600px" class="flex-grow-1" fixed-header>
           <thead>
@@ -78,8 +82,6 @@
 <script>
 /**
  * TODO:
- *  - fenetre de selection,
- *  - consommation sur la fenetre,
  *  - db
  * (- bug de deconnexion)
  */
@@ -180,6 +182,28 @@ export default {
           window.URL.revokeObjectURL(url)
         }, 0)
       }
+    }
+  },
+  computed: {
+    consomation() {
+      let res = this.receivedHistory
+        .filter(d => d.data.timestamp.fromStart/1000 >= this.window[0] && d.data.timestamp.fromStart/1000 <= this.window[1])
+        .map(d => {
+          return {
+            x: d.data.timestamp.fromStart/1000,
+            y: d.data.current
+          }
+        })
+        .reduce((acc, v) => {
+          return {
+            currentSum: acc.currentSum + v.y * (acc.time.prev === undefined ? 0 : (acc.time.prev - v.x)),
+            time: { min: Math.min(acc.time.min, v.x), max: Math.max(acc.time.max, v.x), prev: v.x }
+          }
+        }, { currentSum: 0, time: { min: Infinity, max: 0, prev: undefined } })
+
+      console.log(res)
+
+      return (3600 * res.currentSum / (res.time.max-res.time.min)).toPrecision(4)
     }
   },
   watch: {

@@ -7,7 +7,7 @@
 
 export default {
     name: "CustomChart",
-    emits: ["windowSet"],
+    emits: ["windowSet", "windowReset"],
     props: ["plot", "width", "height"],
     mounted() {
         this.canvas = this.$refs["graphCanvas"]
@@ -117,7 +117,7 @@ export default {
             this.canvasCtx.fillStyle = "#000000"
             this.drawScale(this.padding, this.height-this.padding, this.width-this.padding, this.height-this.padding, [this.tMin, this.tMax], {label: "Temps (s.)", offY: 30}, -5, 20)
 
-            if (this.mouseEndPos !== undefined)
+            if (this.mouseEndPos !== undefined && this.mouseEndPos.x != this.mouseStartPos.x)
                 this.drawSelect()
         },
 
@@ -233,10 +233,14 @@ export default {
             this.calcSeries(this.plot)
             this.updateCanvas()
 
-            this.$emit("windowSet", [
-                (this.tMax-this.tMin) * (this.mouseStartPos.x-this.padding)/this.drawWidth + this.tMin,
-                (this.tMax-this.tMin) * (this.mouseEndPos.x-this.padding)/this.drawWidth + this.tMin,
-            ])
+            if (this.mouseEndPos.x == this.mouseStartPos.x) {
+                this.$emit("windowReset")
+            } else {
+                this.$emit("windowSet", [
+                    (this.tMax-this.tMin) * (this.mouseStartPos.x-this.padding)/this.drawWidth + this.tMin,
+                    (this.tMax-this.tMin) * (this.mouseEndPos.x-this.padding)/this.drawWidth + this.tMin,
+                ])
+            }
         },
         resetScale() {
             this.scaleX = 1
