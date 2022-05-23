@@ -6,6 +6,8 @@
             <v-tab value="graph">Graphe</v-tab>
             <v-tab value="log">Log</v-tab>
             <v-tab value="settings">Paramètres</v-tab>
+
+            <ReadSwitch></ReadSwitch>
         </v-tabs>
 
         <v-window v-model="tab">
@@ -29,11 +31,12 @@
 </template>
 
 <script>
-import DevicesList  from "./components/DevicesList.vue"
-import ScreensView  from "./components/ScreensView.vue"
-import GraphView    from "./components/GraphView.vue"
-import LogView      from "./components/LogView.vue"
-import SettingsView from "./components/SettingsView.vue"
+import DevicesList  from "@/components/DevicesList.vue"
+import ScreensView  from "@/components/ScreensView.vue"
+import GraphView    from "@/components/GraphView.vue"
+import LogView      from "@/components/LogView.vue"
+import SettingsView from "@/components/SettingsView.vue"
+import ReadSwitch   from "@/components/ReadSwitch.vue";
 
 import { useState } from "@/stores/stateStore";
 
@@ -44,7 +47,8 @@ export default {
         ScreensView,
         GraphView,
         LogView,
-        SettingsView
+        SettingsView,
+        ReadSwitch
     },
     setup() {
         const state = useState()

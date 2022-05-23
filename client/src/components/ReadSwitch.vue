@@ -1,5 +1,5 @@
 <template>
-  <v-switch v-model="state.read" label="Lire" color="primary"></v-switch>
+  <v-switch v-model="state.read" label="Lire"></v-switch>
 </template>
 
 <script>

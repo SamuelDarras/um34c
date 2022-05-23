@@ -65,6 +65,7 @@ class Controller extends EventEmitter {
         this.ws.send(JSON.stringify({type: "success", data: {what: what, ...data}}))
     }
     error(err, what) {
+        err = { message: "", ...err }
         this.ws.send(JSON.stringify({type: "error", data: {what: what, msg: err.message}}))
     }
     info(what) {

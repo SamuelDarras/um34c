@@ -52,6 +52,7 @@ async function main() {
                     })
             })
             .on("disconnect", data => {
+                if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 controller.disconnect()
                     .then(() => {
                         controller.success("disconnect")
@@ -59,6 +60,7 @@ async function main() {
                     .catch(err => { console.error(err); controller.error(err, "disconnect") })
             })
             .on("changeRate", data => {
+                if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 if (controller.device !== null) {
                     controller.device.rate = data.rate
                     controller.device.readEvery(data.rate)
@@ -68,27 +70,30 @@ async function main() {
                 }
             })
             .on("prevScreen", data => {
+                if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 controller.device.prev()
             })
             .on("nextScreen", data => {
+                if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 controller.device.next()
             })
             .on("changeSettings", data => {
+                if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 controller.device.setBrightness(data.settings.brightness)
                 controller.device.setTimeout(data.settings.timeout)
             })
             .on("readOn", () => {
+                if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 controller.device.readEvery(controller.device.rate)
                 recorder.new()
             })
             .on("readOff", () => {
+                if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 controller.device.readEvery(0)
             })
             .on("export", settings => {
                 recorder.fields = settings.fields ? settings.fields : ["timestamp.fromStart", "current", "voltage"]
-                let path = settings.path ? settings.path : "export.csv"
-
-                
+                let path = settings.path ? settings.path : "export.csv" 
                 
                 recorder.export((data) => {
                     options = {

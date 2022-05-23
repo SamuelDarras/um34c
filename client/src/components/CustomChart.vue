@@ -31,8 +31,8 @@ export default {
             scalesSteps: 20,
 
             mouseClicked: false,
-            mouseStartPos: {x: 0, y: 0},
-            mouseEndPos: {x: 0, y: 0},
+            mouseStartPos: undefined,
+            mouseEndPos: undefined,
             rawPlot: undefined
         }
     },
@@ -66,6 +66,8 @@ export default {
                 this.tMin = minx
                 this.tMax = maxx
             })
+
+
 
             this.updateCanvas()
 
@@ -185,6 +187,8 @@ export default {
             this.canvasCtx.restore()
         },
         drawSelect() {
+            if (this.mouseStartPos === undefined ||this.mouseEndPos === undefined) return
+
             this.canvasCtx.fillStyle = "rgb(0, 30, 180, .1)"
             this.canvasCtx.fillRect(this.mouseStartPos.x, this.padding, this.mouseEndPos.x - this.mouseStartPos.x, this.drawHeight)
             this.canvasCtx.strokeStyle = "rgb(0, 30, 180)"
@@ -234,6 +238,8 @@ export default {
             this.updateCanvas()
 
             if (this.mouseEndPos.x == this.mouseStartPos.x) {
+                this.mouseStartPos = undefined
+                this.mouseEndPos = undefined
                 this.$emit("windowReset")
             } else {
                 let v1 = (this.tMax-this.tMin) * (this.mouseStartPos.x-this.padding)/this.drawWidth + this.tMin

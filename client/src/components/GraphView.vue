@@ -3,7 +3,6 @@
     <v-card-title> Graphe </v-card-title>
     <v-card-text>
       <div class="d-flex">
-        <ReadSwitch></ReadSwitch>
         <v-text-field v-model="rate" :rules="[!isNaN(parseInt(rate)) || 'La valeur doit être un nombre']"
           suffix="millisecondes"></v-text-field>
         <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
@@ -14,7 +13,6 @@
       <div class="d-flex">
 
         <Chart @windowSet="window = $event" @windowReset="window = undefined" :plot="plot" width="1200" height="600"></Chart>
-        <!-- <apexchart width="1000" type="line" :options="chartOptions" :series="series"></apexchart> -->
         <v-table height="600px" class="flex-grow-1" fixed-header>
           <thead>
             <tr>
@@ -43,7 +41,7 @@
         </template>
         <v-card>
           <v-card-title>
-            <span class="text-h5">User Profile</span>
+            <span class="text-h5">Export</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -82,19 +80,17 @@
 <script>
 /**
  * TODO:
+ *  - meilleur calc de consomation
  *  - db
  * (- bug de deconnexion)
  */
 
-
-import ReadSwitch from "@/components/ReadSwitch.vue"
 import CustomChart from "@/components/CustomChart.vue"
 
 export default {
   name: "GraphView",
   components: {
     Chart: CustomChart,
-    ReadSwitch
   },
   mounted() {
     this.wsm.controller.on("exportFile", data => {

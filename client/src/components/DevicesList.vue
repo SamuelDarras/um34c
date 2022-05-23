@@ -24,24 +24,21 @@
                 {{ device.name }}
                 </th>
                 <th class="d-flex">
-                <v-btn
-                    v-if="device.address != connectedAddr"
-                    icon="mdi-bluetooth"
-                    size="x-small"
-                    class="ma-3"
-                    @click="wsm.connect(device.address)"
-                    color="primary"
-                >
-                </v-btn>
-                <v-btn
-                    v-else
-                    icon="mdi-bluetooth-connect"
-                    size="x-small"
-                    class="ma-3"
-                    color="success"
-                >
-                </v-btn>
-                <ReadSwitch v-if="state.connected"></ReadSwitch>
+                    <v-btn
+                        v-if="device.address != connectedAddr"
+                        icon="mdi-bluetooth"
+                        size="x-small"
+                        class="ma-3"
+                        @click="wsm.connect(device.address)"
+                        color="primary"
+                    />
+                    <v-btn
+                        v-else
+                        icon="mdi-bluetooth-connect"
+                        size="x-small"
+                        class="ma-3"
+                        color="success"
+                    />
                 </th>
             </tr>
             </tbody>
@@ -55,16 +52,11 @@
 </template>
 
 <script>
-import ReadSwitch from "@/components/ReadSwitch.vue"
-
 import { useState } from "@/stores/stateStore";
 
 export default {
     name: "DevicesList",
     props: ["data"],
-    components: {
-        ReadSwitch
-    },
     data() {
         return {
             devices: [],
