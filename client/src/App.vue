@@ -24,7 +24,7 @@
                 <LogView :data="receivedData" :receivedHistory="receivedHistory" @clear="receivedHistory = []; curNum = 0"></LogView>
             </v-window-item>
             <v-window-item v-if="state.received" value="settings">
-                <SettingsView :data="receivedData" :receivedHistory="receivedHistory"></SettingsView>
+                <SettingsView :data="receivedData.data" :receivedHistory="receivedHistory"></SettingsView>
             </v-window-item>
         </v-window>
     </v-app>
