@@ -7,11 +7,7 @@
           suffix="millisecondes"></v-text-field>
         <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
       </div>
-      <div>
-        <p v-if="window !== undefined">Consomation durant la fenêtre: {{ consomation }} mAh</p>
-      </div>
       <div class="d-flex">
-
         <Chart @windowSet="window = $event" @windowReset="window = undefined" :plot="plot" width="1200" height="600"></Chart>
         <v-table height="600px" class="flex-grow-1" fixed-header>
           <thead>
@@ -29,6 +25,9 @@
             </tr>
           </tbody>
         </v-table>
+      </div>
+      <div>
+        <p v-if="window !== undefined">Consomation durant la fenêtre: {{ consomation }} mAh</p>
       </div>
     </v-card-text>
     
@@ -78,12 +77,6 @@
 </template>
 
 <script>
-/**
- * TODO:
- *  - meilleur calc de consomation
- *  - db
- * (- bug de deconnexion)
- */
 
 import CustomChart from "@/components/CustomChart.vue"
 
@@ -183,23 +176,34 @@ export default {
   computed: {
     consomation() {
       let res = this.receivedHistory
-        .filter(d => d.data.timestamp.fromStart/1000 >= this.window[0] && d.data.timestamp.fromStart/1000 <= this.window[1])
+        .filter(d => d.data.timestamp.fromStart/1000 >= this.window[0] && d.data.timestamp.fromStart/1000 <= this.window[1]) // [Obj]
         .map(d => {
           return {
             x: d.data.timestamp.fromStart/1000,
             y: d.data.current
           }
-        })
+        }) // [(s, mA)]
         .reduce((acc, v) => {
-          return {
-            currentSum: acc.currentSum + v.y * (acc.time.prev === undefined ? 0 : (acc.time.prev - v.x)),
-            time: { min: Math.min(acc.time.min, v.x), max: Math.max(acc.time.max, v.x), prev: v.x }
+          let sum = acc.sum
+          if (acc.prev_x !== undefined && acc.prev_y !== undefined) {
+            sum += (acc.prev_x - v.x)*v.y - ((acc.prev_x-v.x) * (v.y-acc.prev_y))/2
           }
-        }, { currentSum: 0, time: { min: Infinity, max: 0, prev: undefined } })
+          return {
+            sum: sum,
+            prev_x: v.x,
+            prev_y: v.y,
+            time: {
+              min: Math.min(acc.time.min, v.x),
+              max: Math.max(acc.time.max, v.x)
+            }
+          }
+        }, { sum: 0, prev_x: undefined, prev_y: undefined, time: { min: Infinity, max: 0 } })
 
       console.log(res)
 
-      return (3600 * res.currentSum / (res.time.max-res.time.min)).toPrecision(4)
+      console.log()
+
+      return (3600 * res.sum / (res.time.max-res.time.min)).toPrecision(4)
     }
   },
   watch: {
