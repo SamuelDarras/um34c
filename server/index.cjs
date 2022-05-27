@@ -85,7 +85,6 @@ async function main() {
             .on("readOn", () => {
                 if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 controller.device.readEvery(controller.device.rate)
-                recorder.new()
             })
             .on("readOff", () => {
                 if (!controller.device?.serial?.isOpen) { controller.error(); return }
@@ -93,7 +92,7 @@ async function main() {
             })
             .on("export", settings => {
                 recorder.fields = settings.fields ? settings.fields : ["timestamp.fromStart", "current", "voltage"]
-                let path = settings.path ? settings.path : "export.csv" 
+                let path = settings.path ? "./recordings/files/"+settings.path : "export.csv" 
                 
                 recorder.export((data) => {
                     options = {
@@ -117,6 +116,8 @@ async function main() {
                     })
 
                     controller.send("exportFile", csv)
+
+                    return path
                 })
             })
 
