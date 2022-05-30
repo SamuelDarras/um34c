@@ -4,6 +4,7 @@ const fs = require("fs")
 const { Controller } = require("./controller.cjs")
 const { Recorder } = require("./recorder.cjs")
 const site = require("./server.cjs")
+const { createHash } = require("crypto")
 
 let recorder = new Recorder()
 
@@ -92,7 +93,13 @@ async function main() {
             })
             .on("export", settings => {
                 recorder.fields = settings.fields ? settings.fields : ["timestamp.fromStart", "current", "voltage"]
-                let path = settings.path ? "./recordings/files/"+settings.path : "export.csv" 
+                // let path = settings.path ? "./recordings/files/"+settings.path : "export.csv" 
+                let hash = createHash("sha256")
+                hash.update(
+                    Object
+                        .entries(settings)
+                        .reduce((acc, c) => acc + c.toString, "")
+                )
                 
                 recorder.export((data) => {
                     options = {
@@ -110,6 +117,11 @@ async function main() {
                     }
                     console.log(csv)
 
+                    hash.update(Object.entries(data).reduce((acc, c) => acc+c.toString(), ""))
+                    let digest = hash.digest()
+                
+                    let path = "./recordings/files/" + digest.toString("hex")
+
                     fs.writeFile(path, csv, err => {
                         if (err) controller.error(err, "export")
                         else controller.success("exportDone")
@@ -117,7 +129,7 @@ async function main() {
 
                     controller.send("exportFile", csv)
 
-                    return path
+                    return { path: path, name: settings.name }
                 })
             })
 

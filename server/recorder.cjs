@@ -1,3 +1,22 @@
+const fs = require("fs")
+const sqlite3 = require("sqlite3")
+
+let base_exitsts = fs.existsSync("./recordings/base.sqlite3")
+
+const db = new sqlite3.Database('./recordings/base.sqlite3')
+if (!base_exitsts) {
+    db.run("CREATE TABLE records (\
+        id INTEGER PRIMARY KEY,\
+        date DATE DEFAULT (datetime('now','localtime')),\
+        name TEXT,\
+        sampleRate INTEGER,\
+        time INTEGER,\
+        filePath TEXT\
+    )", (res, err) => {
+        console.log("Data base created")
+    })
+}
+
 class Recorder {
     constructor() {
         this.data = []
@@ -45,7 +64,14 @@ class Recorder {
                 )
         )
 
-        how(filtered_data)
+        let result = how(filtered_data)
+
+        db.run("INSERT INTO records (name, sampleRate, time, filePath) VALUES ($name, $sampleRate, $time, $filePath);", {
+            $name: result.name,
+            $sampleRate: 100,
+            $time: 1000,
+            $filePath: result.path 
+        })
     }
 }
 

@@ -54,8 +54,9 @@
                 </v-col>
               </v-row>
               <v-row>
-                <v-col cols="12">
-                  <v-text-field v-model="exportPath" label="Fichier"></v-text-field>
+                <v-col cols="12" class="d-flex">
+                  <v-text-field v-model="sessionName" label="Session"></v-text-field>
+                  <v-checkbox v-model="downloadSession" label="Télécharger"></v-checkbox>
                 </v-col>
               </v-row>
             </v-container>
@@ -87,8 +88,10 @@ export default {
   },
   mounted() {
     this.wsm.controller.on("exportFile", data => {
-      console.log(data)
-      this.download(data, this.exportPath, "csv")
+      if (this.downloadSession) {
+        console.log(data)
+        this.download(data, this.sessionName, "csv")
+      }
     })
   },
   props: ["data", "receivedHistory"],
@@ -141,7 +144,8 @@ export default {
         "screen",
         "unkonown0"
       ],
-      exportPath: "export.csv",
+      sessionName: "session",
+      downloadSession: false,
 
       window: undefined
     }
@@ -152,7 +156,7 @@ export default {
     },
     exportData() {
       // let fields = this.exportFields.split(",").map(v => v.trim())
-      this.wsm.controller.send("export", { fields: this.selectedFields, path: this.exportPath, span: this.window })
+      this.wsm.controller.send("export", { fields: this.selectedFields, name: this.sessionName, span: this.window })
     },
     // Function to download data to a file
     download(data, filename, type) {
