@@ -24,6 +24,8 @@ class Recorder {
         this.nb = 0
 
         this.fields = ["timestamp.fromStart"]
+
+        this.sampleRate = 0
     }
 
     append(n_data) {
@@ -68,8 +70,8 @@ class Recorder {
 
         db.run("INSERT INTO records (name, sampleRate, time, filePath) VALUES ($name, $sampleRate, $time, $filePath);", {
             $name: result.name,
-            $sampleRate: 100,
-            $time: 1000,
+            $sampleRate: this.sampleRate,
+            $time: result.time,
             $filePath: result.path 
         })
     }

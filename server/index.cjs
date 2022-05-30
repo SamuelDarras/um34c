@@ -64,6 +64,7 @@ async function main() {
                 if (!controller.device?.serial?.isOpen) { controller.error(); return }
                 if (controller.device !== null) {
                     controller.device.rate = data.rate
+                    recorder.sampleRate = data.rate
                     controller.device.readEvery(data.rate)
                     controller.success("changeRate")
                 } else {
@@ -85,6 +86,7 @@ async function main() {
             })
             .on("readOn", () => {
                 if (!controller.device?.serial?.isOpen) { controller.error(); return }
+                recorder.sampleRate = controller.device.rate
                 controller.device.readEvery(controller.device.rate)
             })
             .on("readOff", () => {
@@ -129,7 +131,8 @@ async function main() {
 
                     controller.send("exportFile", csv)
 
-                    return { path: path, name: settings.name }
+                    let time = settings.span[1] - settings.span[0]
+                    return { path: path, name: settings.name, time: time }
                 })
             })
 
