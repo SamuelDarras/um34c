@@ -184,7 +184,7 @@ export default {
             data: this.receivedHistory.map((v) => {
               return { x: v.data.timestamp.fromStart / 1000, y: v.data.voltage }
             }),
-            span: [0, 7],
+            span: [0, 15],
             leftScale: {
               label: "Tension (V)"
             },
@@ -194,7 +194,7 @@ export default {
             data: this.receivedHistory.map((v) => {
               return { x: v.data.timestamp.fromStart / 1000, y: v.data.current }
             }),
-            span: [-.01, .05],
+            span: [-.005, .05],
             rightScale: {
               label: "Courrant (A)"
             },

@@ -1,19 +1,20 @@
 const fs = require("fs")
 const sqlite3 = require("sqlite3")
 
-var dir = './recodings'
+var dir = './recordings'
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir)
 }
-dir = './recodings/files'
+dir = './recordings/files'
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir)
 }
 
-dir = './recodings/base.sqlite3'
-let base_exitsts = fs.existsSync("./recordings/base.sqlite3")
+dir = './recordings/base.sqlite3'
+let base_exitsts = fs.existsSync(dir)
 const db = new sqlite3.Database('./recordings/base.sqlite3')
 if (!base_exitsts) {
+    fs.openSync(dir, "w+")
     db.run("CREATE TABLE records (\
         id INTEGER PRIMARY KEY,\
         date DATE DEFAULT (datetime('now','localtime')),\

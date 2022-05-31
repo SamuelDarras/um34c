@@ -5,6 +5,9 @@
             <a v-if="graph" href="#" @click="back()" icon style="text-decoration: none">
                 <v-icon>mdi-arrow-left</v-icon>
             </a>
+            <a v-if="!graph" href="#" @click="this.wsm.controller.send('listSessions')" icon style="text-decoration: none;">
+                <v-icon>mdi-refresh</v-icon>
+            </a>
             <div v-if="!graph">
                 <v-table>
                     <thead>
