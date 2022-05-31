@@ -19,7 +19,7 @@
                 <ScreensView  :data="receivedData.data" :receivedHistory="receivedHistory"></ScreensView>
             </v-window-item>
             <v-window-item v-if="state.received" value="graph">
-                <GraphView :receivedHistory="receivedHistory"></GraphView>
+                <GraphView :receivedHistory="receivedHistory" :count="curNum"></GraphView>
             </v-window-item>
             <v-window-item v-if="state.received" value="log">
                 <LogView :data="receivedData" :receivedHistory="receivedHistory" @clear="receivedHistory = []; curNum = 0"></LogView>

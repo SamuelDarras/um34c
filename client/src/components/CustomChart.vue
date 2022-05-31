@@ -1,6 +1,6 @@
 <template>
     <canvas ref="graphCanvas" :width="width" :height="height" @mousedown="mouseStart" @mousemove="mouseMove" @mouseup="mouseEnd"></canvas>
-    <v-btn icon="mdi-home" @click="resetScale" color="success"></v-btn>
+    <v-btn v-if="settings.zoomable" icon="mdi-home" @click="resetScale" color="success"></v-btn>
 </template>
 
 <script>
@@ -8,7 +8,21 @@
 export default {
     name: "CustomChart",
     emits: ["windowSet", "windowReset"],
-    props: ["plot", "width", "height"],
+    props: {
+        plot: Object,
+        width: Number,
+        height: Number,
+        settings: {
+            type: Object,
+            default: () => {
+                return {
+                    selectable: false,
+                    zoomable: false
+                }
+            }
+        }
+    },
+    // props: ["plot", "width", "height"],
     mounted() {
         this.canvas = this.$refs["graphCanvas"]
         this.canvasCtx = this.canvas.getContext("2d")
@@ -187,6 +201,7 @@ export default {
             this.canvasCtx.restore()
         },
         drawSelect() {
+            if (!this.settings.selectable) return
             if (this.mouseStartPos === undefined ||this.mouseEndPos === undefined) return
 
             this.canvasCtx.fillStyle = "rgb(0, 30, 180, .1)"
@@ -209,6 +224,7 @@ export default {
         },
 
         mouseStart(e) {
+            if (!this.settings.selectable) return
             var rect = this.canvas.getBoundingClientRect()
             let posx = e.clientX - rect.left
             let posy = e.clientY - rect.top
@@ -219,6 +235,7 @@ export default {
             this.mouseClicked = true
         },
         mouseMove(e) {
+            if (!this.settings.selectable) return
             if (this.mouseClicked) {
                 var rect = this.canvas.getBoundingClientRect()
                 let posx = e.clientX - rect.left
@@ -229,6 +246,7 @@ export default {
             this.updateCanvas()
         },
         mouseEnd() {
+            if (!this.settings.selectable) return
             this.mouseClicked = false
 
             // this.scaleX *= (this.drawWidth)/(Math.abs(this.mouseEndPos.x-this.mouseStartPos.x))
@@ -251,6 +269,7 @@ export default {
             }
         },
         resetScale() {
+            if (!this.settings.selectable) return
             this.scaleX = 1
             this.scaleY = 1
             this.offsetX = 0

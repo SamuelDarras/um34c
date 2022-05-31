@@ -8,7 +8,7 @@
         <v-btn color="success" class="ml-3" @click="changeRate()">Appliquer</v-btn>
       </div>
       <div class="d-flex">
-        <Chart @windowSet="window = $event" @windowReset="window = undefined" :plot="plot" width="1200" height="600"></Chart>
+        <Chart @windowSet="window = $event" @windowReset="window = undefined" :plot="plot" :width="1200" :height="600" :settings="{ selectable: true }"></Chart>
         <v-table height="600px" class="flex-grow-1" fixed-header>
           <thead>
             <tr>
@@ -94,7 +94,7 @@ export default {
       }
     })
   },
-  props: ["receivedHistory"],
+  props: ["receivedHistory", "count"],
   data: () => {
     return {
       rate: 1000,
@@ -175,7 +175,33 @@ export default {
           window.URL.revokeObjectURL(url)
         }, 0)
       }
-    }
+    },
+    calcHistory() {
+      this.plot = {
+        series: [
+          {
+            color: "rgb(0, 190, 20)",
+            data: this.receivedHistory.map((v) => {
+              return { x: v.data.timestamp.fromStart / 1000, y: v.data.voltage }
+            }),
+            span: [0, 7],
+            leftScale: {
+              label: "Tension (V)"
+            },
+          },
+          {
+            color: "rgb(0, 20, 190)",
+            data: this.receivedHistory.map((v) => {
+              return { x: v.data.timestamp.fromStart / 1000, y: v.data.current }
+            }),
+            span: [-.01, .05],
+            rightScale: {
+              label: "Courrant (A)"
+            },
+          }
+        ],
+      }
+    },
   },
   computed: {
     consomation() {
@@ -211,31 +237,8 @@ export default {
     }
   },
   watch: {
-    data() {
-      this.plot = {
-        series: [
-          {
-            color: "rgb(0, 190, 20)",
-            data: this.receivedHistory.map((v) => {
-              return { x: v.data.timestamp.fromStart / 1000, y: v.data.voltage }
-            }),
-            span: [0, 7],
-            leftScale: {
-              label: "Tension (V)"
-            },
-          },
-          {
-            color: "rgb(0, 20, 190)",
-            data: this.receivedHistory.map((v) => {
-              return { x: v.data.timestamp.fromStart / 1000, y: v.data.current }
-            }),
-            span: [-.01, .05],
-            rightScale: {
-              label: "Courrant (A)"
-            },
-          }
-        ],
-      }
+    count() {
+      this.calcHistory()
     },
     window(new_v) {
       console.log(new_v)

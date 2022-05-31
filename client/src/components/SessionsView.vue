@@ -30,7 +30,7 @@
                 </v-table>
             </div>
             <div v-else>
-                <CustomChart :plot="selectedPlot" width="1700" height="600">
+                <CustomChart :plot="selectedPlot" :width="1700" :height="800">
                 </CustomChart>
             </div>
         </v-card-text>
