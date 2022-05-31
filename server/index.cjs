@@ -1,4 +1,6 @@
 const { Parser, transforms: { flatten } } = require("json2csv")
+const csvtojson = require("csvtojson")
+
 const fs = require("fs")
 
 const { Controller } = require("./controller.cjs")
@@ -131,8 +133,27 @@ async function main() {
 
                     controller.send("exportFile", csv)
 
-                    let time = settings.span[1] - settings.span[0]
+                    let time
+                    if (settings.span !== undefined) {
+                        time = settings.span[1] - settings.span[0]
+                    } else {
+                        time = Math.max(...data.map(v => v["timestamp.fromStart"]/1000)) - Math.min(...data.map(v => v["timestamp.fromStart"]/1000))
+                    }
                     return { path: path, name: settings.name, time: time }
+                })
+            })
+            .on("listSessions", () => {
+                recorder.getDb().all("SELECT * FROM records", (err, rows) => {
+                    controller.send("listSessions", rows)
+                })
+            })
+            .on("getSession", data => {
+                recorder.getDb().get("SELECT * FROM records WHERE id = $id", { $id: data.id }, (err, row) => {
+                    csvtojson()
+                        .fromFile(row.filePath)
+                        .then(obj => {
+                            controller.send("getSession", obj)
+                        })
                 })
             })
 

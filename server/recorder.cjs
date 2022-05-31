@@ -43,6 +43,10 @@ class Recorder {
         this.nb = 0
     }
 
+    getDb() {
+        return db
+    }
+
     export(how) {
         const flattenObj = (obj, parent, res = {}) => {
             for (const key of Object.keys(obj)) {
@@ -78,5 +82,5 @@ class Recorder {
 }
 
 module.exports = {
-    Recorder
+    Recorder,
 }
