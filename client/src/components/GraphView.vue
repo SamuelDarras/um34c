@@ -94,7 +94,7 @@ export default {
       }
     })
   },
-  props: ["data", "receivedHistory"],
+  props: ["receivedHistory"],
   data: () => {
     return {
       rate: 1000,

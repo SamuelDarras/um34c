@@ -5,6 +5,7 @@
             <v-tab value="screens">Ecrans</v-tab>
             <v-tab value="graph">Graphe</v-tab>
             <v-tab value="log">Log</v-tab>
+            <v-tab value="sessions">Sessions</v-tab>
             <v-tab value="settings">Paramètres</v-tab>
 
             <ReadSwitch></ReadSwitch>
@@ -18,10 +19,13 @@
                 <ScreensView  :data="receivedData.data" :receivedHistory="receivedHistory"></ScreensView>
             </v-window-item>
             <v-window-item v-if="state.received" value="graph">
-                <GraphView :data="receivedData" :receivedHistory="receivedHistory"></GraphView>
+                <GraphView :receivedHistory="receivedHistory"></GraphView>
             </v-window-item>
             <v-window-item v-if="state.received" value="log">
                 <LogView :data="receivedData" :receivedHistory="receivedHistory" @clear="receivedHistory = []; curNum = 0"></LogView>
+            </v-window-item>
+            <v-window-item value="sessions">
+                <SessionView></SessionView>
             </v-window-item>
             <v-window-item v-if="state.received" value="settings">
                 <SettingsView :data="receivedData.data" :receivedHistory="receivedHistory"></SettingsView>
@@ -37,6 +41,7 @@ import GraphView    from "@/components/GraphView.vue"
 import LogView      from "@/components/LogView.vue"
 import SettingsView from "@/components/SettingsView.vue"
 import ReadSwitch   from "@/components/ReadSwitch.vue";
+import SessionView  from "@/components/SessionsView.vue";
 
 import { useState } from "@/stores/stateStore";
 
@@ -48,7 +53,8 @@ export default {
         GraphView,
         LogView,
         SettingsView,
-        ReadSwitch
+        ReadSwitch,
+        SessionView
     },
     setup() {
         const state = useState()
