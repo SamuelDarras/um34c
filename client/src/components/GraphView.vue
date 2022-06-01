@@ -27,7 +27,7 @@
         </v-table>
       </div>
       <div>
-        <p v-if="window !== undefined">Consomation durant la fenêtre: {{ consomation }} mAh</p>
+        <p v-if="window !== undefined">{{ consomation }}</p>
       </div>
     </v-card-text>
     
@@ -205,36 +205,56 @@ export default {
   },
   computed: {
     consomation() {
-      let res = this.receivedHistory
-        .filter(d => d.data.timestamp.fromStart/1000 >= this.window[0] && d.data.timestamp.fromStart/1000 <= this.window[1]) // [Obj]
-        .map(d => {
-          return {
-            x: d.data.timestamp.fromStart/1000,
-            y: d.data.current
-          }
-        }) // [(s, mA)]
-        .reduce((acc, v) => {
-          let sum = acc.sum
-          if (acc.prev_x !== undefined && acc.prev_y !== undefined) {
-            sum += (acc.prev_x - v.x)*v.y - ((acc.prev_x-v.x) * (v.y-acc.prev_y))/2
-          }
-          return {
-            sum: sum,
-            prev_x: v.x,
-            prev_y: v.y,
-            time: {
-              min: Math.min(acc.time.min, v.x),
-              max: Math.max(acc.time.max, v.x)
-            }
-          }
-        }, { sum: 0, prev_x: undefined, prev_y: undefined, time: { min: Infinity, max: 0 } })
+        console.log(this.window)
+        let res = this.receivedHistory
+            .filter(d => d.data.timestamp.fromStart/1000 >= this.window[0] && d.data.timestamp.fromStart/1000 <= this.window[1]) // [Obj]
+            .map(d => {
+                return {
+                    x: d.data.timestamp.fromStart/1000,
+                    y: parseFloat(d.data.current)
+                }
+            }) // [(s, mA)]
+            .reduce((acc, v) => {
+              let dx = acc.prev_x === undefined ? v.x-this.window[0] : v.x - acc.prev_x
+              return {
+                    sum: acc.sum + dx * v.y,
+                    prev_x: v.x
+                }
+            }, { sum: 0, prev_x: undefined })
 
-      console.log(res)
+        return `Total mA: ${(res.sum/(this.window[1]-this.window[0])).toPrecision(4)}, Total mAs: ${(res.sum).toPrecision(4)}, Total t: ${(this.window[1]-this.window[0]).toPrecision(4)}`
+    },
+    // consomation() {
+    //   let res = this.receivedHistory
+    //     .filter(d => d.data.timestamp.fromStart/1000 >= this.window[0] && d.data.timestamp.fromStart/1000 <= this.window[1]) // [Obj]
+    //     .map(d => {
+    //       return {
+    //         x: d.data.timestamp.fromStart/1000,
+    //         y: d.data.current
+    //       }
+    //     }) // [(s, mA)]
+    //     .reduce((acc, v) => {
+    //       let sum = acc.sum
+    //       if (acc.prev_x !== undefined && acc.prev_y !== undefined) {
+    //         sum += (acc.prev_x - v.x)*v.y - ((acc.prev_x-v.x) * (v.y-acc.prev_y))/2
+    //       }
+    //       return {
+    //         sum: sum,
+    //         prev_x: v.x,
+    //         prev_y: v.y,
+    //         time: {
+    //           min: Math.min(acc.time.min, v.x),
+    //           max: Math.max(acc.time.max, v.x)
+    //         }
+    //       }
+    //     }, { sum: 0, prev_x: undefined, prev_y: undefined, time: { min: Infinity, max: 0 } })
 
-      console.log()
+    //   console.log(res)
 
-      return (3600 * res.sum / (res.time.max-res.time.min)).toPrecision(4)
-    }
+    //   console.log()
+
+    //   return (3600 * res.sum / (res.time.max-res.time.min)).toPrecision(4)
+    // }
   },
   watch: {
     count() {
