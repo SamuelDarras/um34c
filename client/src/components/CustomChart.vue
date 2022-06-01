@@ -17,7 +17,8 @@ export default {
             default: () => {
                 return {
                     selectable: false,
-                    zoomable: false
+                    zoomable: false,
+                    values: 300
                 }
             }
         }
@@ -32,6 +33,9 @@ export default {
         this.padding    = Math.max(this.width, this.height) * 0.05
         this.drawWidth  = this.width  - this.padding*2
         this.drawHeight = this.height - this.padding*2
+
+        this.calcSeries(this.plot)
+        console.log(this.settings, this.series)
     },
 
     data() {
@@ -61,7 +65,11 @@ export default {
             this.series = JSON.parse(JSON.stringify(plot)).series
 
             this.series.forEach(serie => {
-                serie.data = serie.data.filter((_, idx) => idx < this.values)
+                serie.span = [
+                    Math.min(serie.span[0], Math.min(...serie.data.map(p => p.y))),
+                    Math.max(serie.span[1], Math.max(...serie.data.map(p => p.y))),
+                ]
+                serie.data = serie.data.filter((_, idx) => idx < this.settings.values)
 
                 let minx = Math.min(...serie.data.map(p => p.x))
                 let maxx = Math.max(...serie.data.map(p => p.x))

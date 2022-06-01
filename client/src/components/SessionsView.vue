@@ -33,8 +33,11 @@
                 </v-table>
             </div>
             <div v-else>
-                <CustomChart :plot="selectedPlot" :width="1700" :height="800">
+                <CustomChart @windowSet="window = $event" @windowReset="window = undefined" :plot="selectedPlot" :width="1700" :height="800" :settings="{ selectable: true, values: currentSession.length }">
                 </CustomChart>
+                <div>
+                    <p v-if="window !== undefined">{{ consomation }}</p>
+                </div>
             </div>
         </v-card-text>
     </v-card>
@@ -51,8 +54,10 @@ export default {
     data: () => {
         return {
             sessions: undefined,
+            currentSession: undefined,
             graph: false,
-            selectedPlot: undefined
+            selectedPlot: undefined,
+            window: undefined,
         }
     },
     mounted() {
@@ -63,15 +68,17 @@ export default {
     },
     methods: {
         showGraph(id) {
+            this.sessionId = id
             this.wsm.controller.send("getSession", { id: id })
             this.wsm.controller.on("getSession", data => {
+                this.currentSession = data
                 this.selectedPlot = {
                     series: [
                         {
                             color: "rgb(0, 190, 20)",
                             data: data.map((v) => {
                                 return { x: v.timestamp.fromStart / 1000, y: v.voltage }
-                            }),
+                            }).reverse(),
                             span: [0, 7],
                             leftScale: {
                             label: "Tension (V)"
@@ -81,7 +88,7 @@ export default {
                             color: "rgb(0, 20, 190)",
                             data: data.map((v) => {
                                 return { x: v.timestamp.fromStart / 1000, y: v.current }
-                            }),
+                            }).reverse(),
                             span: [-.01, .05],
                             rightScale: {
                             label: "Courrant (A)"
@@ -89,11 +96,33 @@ export default {
                         }
                     ],
                 }
-           })
-            this.graph = true
+                this.graph = true
+            })
         },
         back() {
             this.graph = false
+        }
+    },
+    computed: {
+        consomation() {
+            console.log(this.window)
+            let res = this.currentSession
+                .filter(d => d.timestamp.fromStart/1000 >= this.window[0] && d.timestamp.fromStart/1000 <= this.window[1]) // [Obj]
+                .map(d => {
+                    return {
+                        x: d.timestamp.fromStart/1000,
+                        y: parseFloat(d.current)
+                    }
+                }) // [(s, mA)]
+                .reduce((acc, v) => {
+                    let dx = acc.prev_x === undefined ? v.x-this.window[0] : v.x - acc.prev_x
+                    return {
+                        sum: acc.sum + dx * v.y,
+                        prev_x: v.x
+                    }
+                }, { sum: 0, prev_x: undefined })
+
+            return `Total mA: ${(res.sum/(this.window[1]-this.window[0])).toPrecision(4)}, Total mAs: ${(res.sum).toPrecision(4)}, Total t: ${(this.window[1]-this.window[0]).toPrecision(4)}`
         }
     }
 }
