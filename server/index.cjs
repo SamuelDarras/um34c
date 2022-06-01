@@ -143,7 +143,7 @@ async function main() {
                 })
             })
             .on("listSessions", () => {
-                recorder.getDb().all("SELECT * FROM records", (err, rows) => {
+                recorder.getDb().all("SELECT id, date, name, time FROM records", (err, rows) => {
                     controller.send("listSessions", rows)
                 })
             })

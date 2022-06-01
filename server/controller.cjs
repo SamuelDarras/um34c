@@ -9,7 +9,7 @@ class Controller extends EventEmitter {
         this.ws = ws
         this.ws.on("message", msg => {
             let message = JSON.parse(msg)
-            console.log(message)
+            console.log("<<<", message)
             this.emit(message.type, message.data)
         })
 
@@ -55,6 +55,7 @@ class Controller extends EventEmitter {
     }
 
     send(type, data) {
+        console.log(">>>", {type: type, data: data})
         this.ws.send(JSON.stringify({type: type, data: data}))
     }
     sendBytes(type, data) {
