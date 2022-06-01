@@ -1,3 +1,13 @@
+# Installation
+
+1. Lancer `npm install` dans le répertoire `server` et dans le répertoire `client`
+2. Il est nécessaire de lancer le serveur et le client:
+   1. Lancer dans `server`: `node ./`
+   2. Lancer dans `client`: `npm run server`
+
+
+Le testeur USB a des problèmes pour se déconnecter, il est donc nécessaire de terminer et relancer le serveur entre chaque connexion.
+
 # um34c
 
-um34c data structure copied from : https://github.com/sebastianha/um34c
+structure des données copiées de : https://github.com/sebastianha/um34c
