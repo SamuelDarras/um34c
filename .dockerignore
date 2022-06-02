@@ -1,0 +1,5 @@
+server/node_modules
+server/recordings
+client/node_modules
+.vscode/
+npm-debug.log
