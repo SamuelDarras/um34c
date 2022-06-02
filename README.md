@@ -8,6 +8,10 @@
 
 Le testeur USB a des problèmes pour se déconnecter, il est donc nécessaire de terminer et relancer le serveur entre chaque connexion.
 
+# Docker
+
+Image : https://hub.docker.com/repository/docker/samueldarras/um34c/
+
 # um34c
 
 structure des données copiées de : https://github.com/sebastianha/um34c
