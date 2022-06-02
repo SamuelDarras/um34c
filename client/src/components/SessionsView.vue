@@ -26,7 +26,7 @@
                                 {{ session.date }}
                             </td>
                             <td>
-                                {{ session.time.toPrecision(4) }} s.
+                                {{ session.time?.toPrecision(4) }} s.
                             </td>
                         </tr>
                     </tbody>
@@ -40,6 +40,13 @@
                 </div>
             </div>
         </v-card-text>
+        <v-card-actions>
+            <div>
+                <v-file-input v-model="inputFile"/>
+                <p style="color: red;" v-if="error">{{ this.error }}</p>
+                <v-btn @click="importFile()" color="success">Importer</v-btn>
+            </div>
+        </v-card-actions>
     </v-card>
 </template>
 
@@ -58,6 +65,8 @@ export default {
             graph: false,
             selectedPlot: undefined,
             window: undefined,
+            inputFile: undefined,
+            error: undefined
         }
     },
     mounted() {
@@ -101,6 +110,20 @@ export default {
         },
         back() {
             this.graph = false
+        },
+        importFile() {
+            console.log(this.inputFile[0])
+            // if (this.inputFile[0].name.split(".")[1] != "csv") {
+            //     this.error = "Le fichier n'est pas un csv"
+            //     return
+            // } else {
+            //     this.error = undefined
+            // }
+            let reader = new FileReader()
+            reader.addEventListener("load", (evt) => {
+                this.wsm.controller.send("importSession", { name: this.inputFile[0].name.split(".")[0], data: evt.target.result })
+            })
+            reader.readAsText(this.inputFile[0])
         }
     },
     computed: {

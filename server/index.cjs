@@ -156,6 +156,14 @@ async function main() {
                         })
                 })
             })
+            .on("importSession", evt => {
+                let filePath = "./recordings/files/" + evt.name
+                fs.writeFile(filePath, evt.data, () => {})
+                recorder.getDb().run("INSERT INTO records (name, filePath) VALUES ($name, $filePath)", {
+                    $name: evt.name,
+                    $filePath: filePath
+                })
+            })
 
         ws.on('error', function (e) { return console.log(e) })
         ws.on('close', function (e) { return console.log('websocket closed', e) })
