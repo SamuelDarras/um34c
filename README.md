@@ -11,6 +11,7 @@ Le testeur USB a des problèmes pour se déconnecter, il est donc nécessaire de
 # Docker
 
 Image : https://hub.docker.com/repository/docker/samueldarras/um34c/
+Commande: `sudo docker run --net=host --privileged -p 8080:8080 -p 4000:4000 -d <nom-d'image>`
 
 # um34c
 
