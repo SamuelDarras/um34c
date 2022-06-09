@@ -1,7 +1,8 @@
 # Installation
 
 1. Lancer `npm install` dans le répertoire `server` et dans le répertoire `client`
-2. Il est nécessaire de lancer le serveur et le client:
+2. Il faut installer la librairie `libbluetooth-dev`
+3. Il est nécessaire de lancer le serveur et le client:
    1. Lancer dans `server`: `node ./`
    2. Lancer dans `client`: `npm run serve`
 
